@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mi rutina">
+<meta name="theme-color" content="#F5F4EF">
+<title>Mi rutina</title>
+<style>
+  :root {
+    --surface-0: #F5F4EF;
+    --surface-1: #FFFFFF;
+    --border: rgba(0,0,0,0.09);
+    --border-strong: rgba(0,0,0,0.18);
+    --text-primary: #1A1A18;
+    --text-secondary: #6B6B63;
+    --text-muted: #9A9A90;
+    --fill-accent: #2F6FDE;
+    --on-accent: #FFFFFF;
+    --text-accent: #2F6FDE;
+    --border-accent: #2F6FDE;
+    --bg-success: #E3F3E9;
+    --text-success: #1F6B3D;
+    --border-success: #B8DDC4;
+    --fill-success: #3B8F5C;
+    --bg-warning: #FDF3DC;
+    --text-warning: #8A5A10;
+    --border-warning: #EBCB86;
+    --fill-warning: #E8B94D;
+    --fill-disabled: #DDDDD8;
+    --text-disabled: #A6A69E;
+    --text-danger: #C0473F;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --surface-0: #171715;
+      --surface-1: #211F1D;
+      --border: rgba(255,255,255,0.10);
+      --border-strong: rgba(255,255,255,0.18);
+      --text-primary: #F2F1EC;
+      --text-secondary: #B3B2A9;
+      --text-muted: #82817A;
+      --fill-accent: #5B93F0;
+      --on-accent: #0E1420;
+      --text-accent: #7FADF7;
+      --border-accent: #5B93F0;
+      --bg-success: rgba(59,143,92,0.18);
+      --text-success: #7FCB99;
+      --border-success: rgba(59,143,92,0.4);
+      --fill-success: #3B8F5C;
+      --bg-warning: rgba(232,185,77,0.16);
+      --text-warning: #E8B94D;
+      --border-warning: rgba(232,185,77,0.4);
+      --fill-warning: #E8B94D;
+      --fill-disabled: #33322F;
+      --text-disabled: #6B6A63;
+      --text-danger: #E0736A;
+    }
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { background: var(--surface-0); }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: var(--text-primary);
+    padding-bottom: 2rem;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  .header { background: var(--surface-1); border-bottom: 0.5px solid var(--border); padding: 1.1rem 1rem 0.9rem; }
+  .header h1 { font-size: 19px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; }
+  .identity-line { font-size: 13px; color: var(--text-secondary); font-style: italic; }
+
+  .tabs { display: flex; gap: 5px; padding: 0.85rem 1rem 0; }
+  .tab {
+    flex: 1; text-align: center; padding: 9px 2px; border-radius: 8px; font-size: 12px; font-weight: 500;
+    background: var(--surface-1); border: 0.5px solid var(--border); color: var(--text-secondary); cursor: pointer;
+  }
+  .tab.active { background: var(--fill-accent); color: var(--on-accent); border-color: var(--fill-accent); }
+
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 1rem; }
+  .stat-card { background: var(--surface-1); border: 0.5px solid var(--border-strong); border-radius: 12px; padding: 0.9rem; text-align: center; }
+  .stat-value { font-size: 24px; font-weight: 600; color: var(--fill-accent); display: block; }
+  .stat-label { font-size: 11px; color: var(--text-secondary); margin-top: 3px; }
+  .streak { color: #C9781F; }
+
+  .habits-section { padding: 0 1rem; }
+  .section-title { font-size: 12px; font-weight: 600; color: var(--text-secondary); margin: 14px 0 8px 2px; }
+
+  .habit-item {
+    background: var(--surface-1); border: 0.5px solid var(--border); border-left: 4px solid var(--card-color, var(--border));
+    border-radius: 10px; padding: 0.9rem; margin-bottom: 10px;
+  }
+  .habit-item.completed { background: var(--card-bg-done, var(--bg-success)); }
+
+  .habit-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 2px; }
+  .habit-name { font-weight: 600; font-size: 15px; color: var(--text-primary); }
+  .habit-anchor { font-size: 11px; color: var(--text-muted); margin-bottom: 10px; }
+
+  .habit-points {
+    font-size: 12px; font-weight: 600; background: var(--card-color, var(--fill-accent));
+    color: #fff; padding: 3px 9px; border-radius: 20px; white-space: nowrap;
+  }
+
+  .subtasks { display: flex; flex-direction: column; gap: 9px; }
+  .subtask { display: flex; align-items: center; font-size: 14px; color: var(--text-primary); gap: 10px; cursor: pointer; }
+  .subtask.optional { color: var(--text-muted); font-style: italic; }
+
+  .subtask-check {
+    width: 20px; height: 20px; min-width: 20px; border: 2px solid var(--border-strong);
+    border-radius: 5px; display: flex; align-items: center; justify-content: center;
+    font-size: 12px; background: var(--surface-0);
+  }
+  .subtask-check.done { background: var(--card-color, var(--fill-success)); border-color: var(--card-color); color: #fff; }
+  .subtask-check.optional-done { background: var(--fill-warning); border-color: var(--fill-warning); color: var(--text-primary); }
+  .subtask-pts { margin-left: auto; font-size: 11px; color: var(--text-muted); }
+
+  .daily-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 8px; }
+  .daily-card {
+    background: var(--surface-1); border: 0.5px solid var(--border);
+    border-top: 4px solid var(--card-color, var(--border)); border-radius: 10px; padding: 0.75rem; text-align: center;
+  }
+  .daily-card.completed { background: var(--card-bg-done, var(--bg-success)); }
+  .daily-name { font-size: 12px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; }
+  .daily-check {
+    width: 100%; padding: 7px; border-radius: 7px; border: none; font-size: 11px;
+    font-weight: 600; cursor: pointer; background: var(--card-color, var(--fill-accent)); color: #fff;
+  }
+
+  .reset-btn {
+    width: 100%; background: transparent; border: 0.5px solid var(--border); color: var(--text-secondary);
+    padding: 11px; border-radius: 8px; margin: 4px 0 1rem; cursor: pointer; font-size: 12px;
+  }
+
+  .history-list { padding: 0 1rem 1rem; display: flex; flex-direction: column; gap: 8px; }
+  .history-row {
+    display: flex; align-items: center; justify-content: space-between; background: var(--surface-1);
+    border: 0.5px solid var(--border); border-radius: 10px; padding: 11px 13px;
+  }
+  .history-date { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+  .history-bar-wrap { flex: 1; margin: 0 10px; height: 7px; background: var(--surface-0); border-radius: 4px; overflow: hidden; }
+  .history-bar { height: 100%; background: var(--fill-accent); }
+  .history-pts { font-size: 12px; font-weight: 600; color: var(--text-accent); min-width: 55px; text-align: right; }
+
+  .empty-state { text-align: center; color: var(--text-muted); font-size: 13px; padding: 2rem 1rem; }
+
+  .balance-card {
+    margin: 0 1rem 1rem; background: var(--bg-warning); border: 0.5px solid var(--border-warning);
+    border-radius: 12px; padding: 1.1rem; text-align: center;
+  }
+  .balance-value { font-size: 28px; font-weight: 600; color: var(--text-warning); }
+  .balance-label { font-size: 11px; color: var(--text-secondary); margin-top: 3px; }
+
+  .rewards-list { padding: 0 1rem 1rem; display: flex; flex-direction: column; gap: 9px; }
+  .reward-card {
+    background: var(--surface-1); border: 0.5px solid var(--border); border-left: 4px solid var(--card-color, var(--border));
+    border-radius: 10px; padding: 0.9rem; display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  }
+  .reward-name { font-size: 14px; font-weight: 600; color: var(--text-primary); }
+  .reward-cost { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+  .redeem-btn {
+    background: var(--card-color, var(--fill-accent)); color: #fff; border: none; padding: 9px 14px;
+    border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap;
+  }
+  .redeem-btn:disabled { background: var(--fill-disabled); color: var(--text-disabled); cursor: not-allowed; }
+
+  .redemption-log-title { padding: 0.4rem 1rem; font-size: 12px; font-weight: 600; color: var(--text-secondary); }
+  .log-row {
+    display: flex; justify-content: space-between; padding: 9px 13px; background: var(--surface-1);
+    border: 0.5px solid var(--border); border-radius: 10px; font-size: 12px; margin-bottom: 6px;
+  }
+  .log-cost { color: var(--text-danger); font-weight: 600; }
+
+  .week-section { padding: 0 1rem 1rem; }
+  .week-summary { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 1.2rem; }
+  .week-stat { background: var(--surface-1); border: 0.5px solid var(--border); border-radius: 10px; padding: 0.7rem; text-align: center; }
+  .week-stat-value { font-size: 18px; font-weight: 600; color: var(--fill-accent); }
+  .week-stat-label { font-size: 10px; color: var(--text-secondary); margin-top: 2px; }
+
+  .review-label { font-size: 13px; font-weight: 600; color: var(--text-primary); margin: 14px 0 6px; }
+  .review-input {
+    width: 100%; background: var(--surface-1); border: 0.5px solid var(--border); border-radius: 8px;
+    padding: 10px; font-size: 13px; color: var(--text-primary); font-family: inherit; resize: none; min-height: 60px;
+  }
+
+  .save-review-btn {
+    width: 100%; background: var(--fill-accent); color: var(--on-accent); border: none; padding: 11px;
+    border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; margin-top: 14px;
+  }
+  .saved-badge { font-size: 11px; color: var(--text-success); margin-top: 8px; text-align: center; }
+</style>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+<div id="loginScreen" style="max-width: 340px; margin: 4rem auto; padding: 0 1.5rem;">
+  <h1 style="font-size: 20px; font-weight: 600; text-align: center; margin-bottom: 6px;">Mi rutina</h1>
+  <p style="font-size: 13px; color: var(--text-secondary); text-align: center; margin-bottom: 24px;">Inicia sesión para guardar tu progreso</p>
+  <input type="email" id="loginEmail" placeholder="Correo" style="width:100%; background: var(--surface-1); border: 0.5px solid var(--border); border-radius: 8px; padding: 12px; font-size: 14px; color: var(--text-primary); margin-bottom: 10px;">
+  <input type="password" id="loginPassword" placeholder="Contraseña" style="width:100%; background: var(--surface-1); border: 0.5px solid var(--border); border-radius: 8px; padding: 12px; font-size: 14px; color: var(--text-primary); margin-bottom: 14px;">
+  <div id="loginError" style="font-size: 12px; color: var(--text-danger); margin-bottom: 10px; display:none;"></div>
+  <button onclick="handleLogin()" style="width:100%; background: var(--fill-accent); color: var(--on-accent); border:none; padding: 12px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor:pointer; margin-bottom: 10px;">Iniciar sesión</button>
+  <button onclick="handleRegister()" style="width:100%; background: transparent; color: var(--text-secondary); border: 0.5px solid var(--border); padding: 12px; border-radius: 8px; font-size: 14px; cursor:pointer;">Crear cuenta nueva</button>
+</div>
+
+<div id="appContainer" style="display:none;">
+
+<div class="header">
+  <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+    <div>
+      <h1>Mi rutina</h1>
+      <div class="identity-line" id="identityLine"></div>
+    </div>
+    <button onclick="handleLogout()" style="background:transparent; border:0.5px solid var(--border); color: var(--text-secondary); font-size: 11px; padding: 6px 10px; border-radius: 6px; cursor:pointer; white-space:nowrap;">Salir</button>
+  </div>
+  <div style="font-size: 11px; color: var(--text-muted); margin-top: 6px;" id="syncStatus">Conectando a la nube...</div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" id="tabHoy" onclick="switchTab('hoy')">Hoy</div>
+  <div class="tab" id="tabSemana" onclick="switchTab('semana')">Semana</div>
+  <div class="tab" id="tabHistorial" onclick="switchTab('historial')">Historial</div>
+  <div class="tab" id="tabRecompensas" onclick="switchTab('recompensas')">Premios</div>
+</div>
+
+<div id="viewHoy">
+  <div class="stats">
+    <div class="stat-card">
+      <span class="stat-value" id="totalPoints">0</span>
+      <span class="stat-label">Puntos hoy</span>
+    </div>
+    <div class="stat-card">
+      <span class="stat-value streak" id="streakDays">0</span>
+      <span class="stat-label">Racha</span>
+    </div>
+  </div>
+  <div class="habits-section">
+    <div id="morningContainer"></div>
+    <div id="eveningContainer"></div>
+    <div class="section-title">Hábitos diarios</div>
+    <div class="daily-grid" id="dailyHabitsContainer"></div>
+    <button class="reset-btn" onclick="resetDay()">Reiniciar día</button>
+  </div>
+</div>
+
+<div id="viewSemana" style="display:none;">
+  <div class="week-section">
+    <div class="week-summary" id="weekSummary"></div>
+    <div class="review-label">¿Qué funcionó esta semana?</div>
+    <textarea class="review-input" id="reviewWorked" placeholder="Ej: la rutina matutina, sobre todo el agua al despertar"></textarea>
+    <div class="review-label">¿Qué no funcionó?</div>
+    <textarea class="review-input" id="reviewFailed" placeholder="Ej: se me hizo difícil el deporte los martes"></textarea>
+    <div class="review-label">¿Qué ajusto para la próxima semana?</div>
+    <textarea class="review-input" id="reviewAdjust" placeholder="Ej: mover el deporte a la mañana"></textarea>
+    <button class="save-review-btn" onclick="saveWeekReview()">Guardar cierre semanal</button>
+    <div class="saved-badge" id="savedBadge" style="display:none;">Guardado ✓</div>
+  </div>
+</div>
+
+<div id="viewHistorial" style="display:none;">
+  <div class="history-list" id="historyContainer"></div>
+</div>
+
+<div id="viewRecompensas" style="display:none;">
+  <div class="balance-card">
+    <div class="balance-value" id="balanceValue">0</div>
+    <div class="balance-label">Puntos disponibles para canjear</div>
+  </div>
+  <div class="rewards-list" id="rewardsContainer"></div>
+  <div class="redemption-log-title">Canjes recientes</div>
+  <div class="rewards-list" id="logContainer" style="padding-top:0;"></div>
+</div>
+
+</div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyCuDdyyc4U1sYQ6kY6bEuG7gj9-Fn9PBw4",
+  authDomain: "habittracker-4a3ec.firebaseapp.com",
+  projectId: "habittracker-4a3ec",
+  storageBucket: "habittracker-4a3ec.firebasestorage.app",
+  messagingSenderId: "1074101146396",
+  appId: "1:1074101146396:web:cfac1fad3eb58664aee0d9"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+let currentUid = null;
+let applyingRemoteData = false;
+let syncTimer = null;
+
+const LOCAL_KEY_PREFIXES = ['habitState_', 'weekReview_'];
+const LOCAL_KEY_EXACT = ['habitHistoryIndex', 'habitStreak', 'lastStreakDate', 'redeemedTotal', 'redemptionLog'];
+
+function collectAllLocalData() {
+  const data = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (LOCAL_KEY_EXACT.includes(key) || LOCAL_KEY_PREFIXES.some(p => key.startsWith(p))) {
+      data[key] = localStorage.getItem(key);
+    }
+  }
+  return data;
+}
+
+function restoreLocalData(data) {
+  applyingRemoteData = true;
+  Object.keys(data).forEach(key => {
+    if (key !== '_updatedAt') localStorage.setItem(key, data[key]);
+  });
+  applyingRemoteData = false;
+}
+
+function setSyncStatus(text) {
+  const el = document.getElementById('syncStatus');
+  if (el) el.textContent = text;
+}
+
+function syncToCloud() {
+  if (!currentUid || applyingRemoteData) return;
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(() => {
+    const data = collectAllLocalData();
+    data._updatedAt = Date.now();
+    setSyncStatus('Guardando...');
+    db.collection('userData').doc(currentUid).set(data)
+      .then(() => setSyncStatus('☁️ Sincronizado'))
+      .catch(() => setSyncStatus('No se pudo guardar (revisa conexión)'));
+  }, 400);
+}
+
+function handleLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const errEl = document.getElementById('loginError');
+  errEl.style.display = 'none';
+  if (!email || !password) {
+    errEl.textContent = 'Ingresa tu correo y contraseña.';
+    errEl.style.display = 'block';
+    return;
+  }
+  auth.signInWithEmailAndPassword(email, password).catch(err => {
+    errEl.textContent = traducirErrorFirebase(err.code);
+    errEl.style.display = 'block';
+  });
+}
+
+function handleRegister() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const errEl = document.getElementById('loginError');
+  errEl.style.display = 'none';
+  if (!email || !password) {
+    errEl.textContent = 'Ingresa tu correo y contraseña.';
+    errEl.style.display = 'block';
+    return;
+  }
+  if (password.length < 6) {
+    errEl.textContent = 'La contraseña debe tener al menos 6 caracteres.';
+    errEl.style.display = 'block';
+    return;
+  }
+  auth.createUserWithEmailAndPassword(email, password).catch(err => {
+    errEl.textContent = traducirErrorFirebase(err.code);
+    errEl.style.display = 'block';
+  });
+}
+
+function handleLogout() {
+  if (confirm('¿Cerrar sesión?')) {
+    auth.signOut();
+  }
+}
+
+function traducirErrorFirebase(code) {
+  const map = {
+    'auth/invalid-email': 'Correo inválido.',
+    'auth/user-not-found': 'No existe una cuenta con ese correo.',
+    'auth/wrong-password': 'Contraseña incorrecta.',
+    'auth/invalid-credential': 'Correo o contraseña incorrectos.',
+    'auth/email-already-in-use': 'Ya existe una cuenta con ese correo. Inicia sesión.',
+    'auth/weak-password': 'La contraseña debe tener al menos 6 caracteres.',
+    'auth/too-many-requests': 'Demasiados intentos. Espera un momento.'
+  };
+  return map[code] || 'Ocurrió un error. Intenta de nuevo.';
+}
+
+function initCloudSync() {
+  auth.onAuthStateChanged(user => {
+    if (!user) {
+      currentUid = null;
+      document.getElementById('loginScreen').style.display = 'block';
+      document.getElementById('appContainer').style.display = 'none';
+      return;
+    }
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('appContainer').style.display = 'block';
+    currentUid = user.uid;
+    db.collection('userData').doc(currentUid).get().then(doc => {
+      if (doc.exists) {
+        restoreLocalData(doc.data());
+      } else {
+        syncToCloud();
+      }
+      setSyncStatus('☁️ Sincronizado');
+      render();
+    });
+    db.collection('userData').doc(currentUid).onSnapshot(doc => {
+      if (!doc.exists) return;
+      const remote = doc.data();
+      if (remote._updatedAt && remote._updatedAt !== window._lastAppliedUpdate) {
+        window._lastAppliedUpdate = remote._updatedAt;
+        restoreLocalData(remote);
+        render();
+      }
+    });
+  });
+}
+
+const identityPhrases = [
+  'Hoy actúo como alguien que cuida su energía.',
+  'Hoy actúo como alguien constante, no perfecto.',
+  'Hoy actúo como alguien que prioriza lo importante.',
+  'Hoy actúo como alguien que termina lo que empieza.',
+  'Hoy actúo como alguien que se mueve aunque no tenga ganas.',
+  'Hoy actúo como alguien que cierra bien sus días.',
+  'Hoy actúo como alguien que también descansa con intención.'
+];
+
+const habitsMorning = [{
+  id: 'morning', name: 'Rutina matutina', anchor: 'Ancla: apenas suena la alarma',
+  color: '#C9781F', bgDone: 'rgba(201,120,31,0.14)',
+  subtasks: [
+    { name: 'Despertarse a tiempo', pts: 15 },
+    { name: 'Estiramientos', pts: 15 },
+    { name: 'Ducha y aseo personal', pts: 15 },
+    { name: 'Desayuno', pts: 15 },
+    { name: 'Top 3 del día', pts: 15 },
+    { name: 'Meditación', pts: 0, optional: true }
+  ]
+}];
+
+const habitsEvening = [{
+  id: 'evening', name: 'Rutina nocturna', anchor: 'Ancla: después de la cena',
+  color: '#6E56CF', bgDone: 'rgba(110,86,207,0.14)',
+  subtasks: [
+    { name: 'Preparar cosas para mañana', pts: 20 },
+    { name: 'Sin pantallas despúes de las 22:00', pts: 20 },
+    { name: 'Ducha', pts: 15 },
+    { name: 'Meditación / oración', pts: 15 },
+    { name: 'Escribir qué aprendí y qué hice bien', pts: 30 }
+  ]
+}];
+
+const dailyHabits = [
+  { id: 'reading', name: 'Lectura', color: '#1D8FA5', bgDone: 'rgba(29,143,165,0.14)', pts: 75 },
+  { id: 'sport', name: 'Deporte', color: '#3B8F5C', bgDone: 'rgba(59,143,92,0.14)', pts: 75 }
+];
+
+const rewards = [
+  { name: 'Salir con amigos', cost: 300, color: '#C0473F' },
+  { name: 'Sesión de gaming (1h)', cost: 100, color: '#6E56CF' },
+  { name: 'Ver una película', cost: 150, color: '#1D8FA5' },
+  { name: 'Antojo / comprita pequeña', cost: 200, color: '#B8862F' },
+  { name: 'Tarde libre sin rutina', cost: 400, color: '#3B8F5C' },
+  { name: 'Comida favorita para pedir', cost: 250, color: '#C9781F' }
+];
+
+function habitMaxPoints(habit) { return habit.subtasks.reduce((sum, s) => sum + s.pts, 0); }
+
+function playSound() {
+  try {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = audioContext.createOscillator();
+    const gain = audioContext.createGain();
+    osc.connect(gain); gain.connect(audioContext.destination);
+    osc.frequency.value = 800; osc.type = 'sine';
+    gain.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+    osc.start(audioContext.currentTime); osc.stop(audioContext.currentTime + 0.1);
+  } catch (e) {}
+}
+
+function confetti() {
+  const colors = ['#C0473F', '#B8862F', '#3B8F5C', '#1D8FA5', '#6E56CF', '#C9781F'];
+  for (let i = 0; i < 20; i++) {
+    const el = document.createElement('div');
+    el.style.position = 'fixed'; el.style.pointerEvents = 'none';
+    el.style.left = Math.random() * 100 + '%'; el.style.top = '-10px';
+    el.style.width = '7px'; el.style.height = '7px';
+    el.style.background = colors[Math.floor(Math.random()*colors.length)];
+    el.style.borderRadius = '50%'; el.style.zIndex = 9999;
+    el.style.transition = 'transform 1.3s ease-out, opacity 1.3s ease-out';
+    document.body.appendChild(el);
+    requestAnimationFrame(() => { el.style.transform = 'translateY(100vh) rotate(360deg)'; el.style.opacity = '0'; });
+    setTimeout(() => el.remove(), 1400);
+  }
+}
+
+function todayKey() { return new Date().toISOString().slice(0,10); }
+
+function getState() {
+  const key = todayKey();
+  const stored = localStorage.getItem('habitState_' + key);
+  return stored ? JSON.parse(stored) : { date: key, subtaskDone: {} };
+}
+
+function saveState(state) { localStorage.setItem('habitState_' + state.date, JSON.stringify(state)); }
+function getHistory() { const s = localStorage.getItem('habitHistoryIndex'); return s ? JSON.parse(s) : []; }
+function saveHistory(dates) { localStorage.setItem('habitHistoryIndex', JSON.stringify(dates)); }
+function getStreak() { const s = localStorage.getItem('habitStreak'); return s ? JSON.parse(s) : 0; }
+function getRedeemedTotal() { const s = localStorage.getItem('redeemedTotal'); return s ? JSON.parse(s) : 0; }
+function getRedemptionLog() { const s = localStorage.getItem('redemptionLog'); return s ? JSON.parse(s) : []; }
+
+function allHabits() { return [...habitsMorning, ...habitsEvening]; }
+
+function allTaskDefs() {
+  const defs = [];
+  allHabits().forEach(h => h.subtasks.forEach((s, i) => defs.push({ key: h.id + '_' + i, pts: s.pts, optional: s.optional })));
+  dailyHabits.forEach(d => defs.push({ key: d.id + '_0', pts: d.pts, optional: false }));
+  return defs;
+}
+
+function computeDayTotal(state) {
+  let total = 0;
+  allTaskDefs().forEach(def => { if (state.subtaskDone[def.key] && !def.optional) total += def.pts; });
+  return total;
+}
+
+function maxDayTotal() { return allTaskDefs().reduce((sum, d) => sum + (d.optional ? 0 : d.pts), 0); }
+
+function getLifetimePoints() {
+  const dates = getHistory(); let total = 0;
+  dates.forEach(date => { const s = localStorage.getItem('habitState_' + date); if (s) total += computeDayTotal(JSON.parse(s)); });
+  return total;
+}
+
+function getAvailableBalance() { return getLifetimePoints() - getRedeemedTotal(); }
+
+function markDateTouched(state) {
+  const dates = getHistory();
+  if (!dates.includes(state.date)) { dates.push(state.date); saveHistory(dates); }
+}
+
+function afterToggleEffects(state) {
+  const total = computeDayTotal(state); const max = maxDayTotal();
+  if (total === max) {
+    confetti();
+    const lastStreakDate = localStorage.getItem('lastStreakDate');
+    if (lastStreakDate !== state.date) {
+      localStorage.setItem('habitStreak', JSON.stringify(getStreak() + 1));
+      localStorage.setItem('lastStreakDate', state.date);
+    }
+  }
+}
+
+function toggleSubtask(habitId, idx) {
+  const state = getState();
+  const subKey = habitId + '_' + idx;
+  state.subtaskDone[subKey] = !state.subtaskDone[subKey];
+  saveState(state);
+  const habit = allHabits().find(h => h.id === habitId);
+  const sub = habit.subtasks[idx];
+  if (state.subtaskDone[subKey] && !sub.optional) playSound();
+  markDateTouched(state); afterToggleEffects(state); render(); syncToCloud();
+}
+
+function toggleDaily(dailyId) {
+  const state = getState();
+  const subKey = dailyId + '_0';
+  state.subtaskDone[subKey] = !state.subtaskDone[subKey];
+  saveState(state);
+  if (state.subtaskDone[subKey]) playSound();
+  markDateTouched(state); afterToggleEffects(state); render(); syncToCloud();
+}
+
+function redeemReward(idx) {
+  const reward = rewards[idx];
+  const balance = getAvailableBalance();
+  if (balance < reward.cost) return;
+  if (!confirm('¿Canjear "' + reward.name + '" por ' + reward.cost + ' puntos?')) return;
+  localStorage.setItem('redeemedTotal', JSON.stringify(getRedeemedTotal() + reward.cost));
+  const log = getRedemptionLog();
+  log.unshift({ name: reward.name, cost: reward.cost, date: todayKey() });
+  localStorage.setItem('redemptionLog', JSON.stringify(log.slice(0, 20)));
+  confetti(); playSound(); renderRecompensas(); syncToCloud();
+}
+
+function resetDay() {
+  if (confirm('¿Seguro que quieres reiniciar el día de hoy?')) {
+    localStorage.removeItem('habitState_' + todayKey()); render(); syncToCloud();
+  }
+}
+
+function switchTab(tab) {
+  ['Hoy','Semana','Historial','Recompensas'].forEach(t => {
+    document.getElementById('tab' + t).classList.toggle('active', t.toLowerCase() === tab);
+    document.getElementById('view' + t).style.display = t.toLowerCase() === tab ? 'block' : 'none';
+  });
+  if (tab === 'historial') renderHistory();
+  if (tab === 'recompensas') renderRecompensas();
+  if (tab === 'semana') renderSemana();
+}
+
+function renderHistory() {
+  const dates = getHistory().sort().reverse();
+  const container = document.getElementById('historyContainer');
+  container.innerHTML = '';
+  if (dates.length === 0) { container.innerHTML = '<div class="empty-state">Aún no hay registros.</div>'; return; }
+  const max = maxDayTotal();
+  dates.slice(0, 30).forEach(date => {
+    const stored = localStorage.getItem('habitState_' + date);
+    if (!stored) return;
+    const state = JSON.parse(stored);
+    const total = computeDayTotal(state);
+    const pct = Math.round((total / max) * 100);
+    const d = new Date(date + 'T00:00:00');
+    const dateLabel = d.toLocaleDateString('es-CL', { weekday: 'short', day: 'numeric', month: 'short' });
+    const row = document.createElement('div');
+    row.className = 'history-row';
+    row.innerHTML = '<span class="history-date">' + dateLabel + '</span><div class="history-bar-wrap"><div class="history-bar" style="width:' + pct + '%"></div></div><span class="history-pts">' + total + '/' + max + '</span>';
+    container.appendChild(row);
+  });
+}
+
+function renderRecompensas() {
+  const balance = getAvailableBalance();
+  document.getElementById('balanceValue').textContent = balance;
+  const rewardsContainer = document.getElementById('rewardsContainer');
+  rewardsContainer.innerHTML = '';
+  rewards.forEach((reward, i) => {
+    const canAfford = balance >= reward.cost;
+    const el = document.createElement('div');
+    el.className = 'reward-card';
+    el.style.setProperty('--card-color', reward.color);
+    el.innerHTML = '<div><div class="reward-name">' + reward.name + '</div><div class="reward-cost">' + reward.cost + ' puntos</div></div><button class="redeem-btn" style="--card-color:' + reward.color + '" ' + (canAfford ? '' : 'disabled') + ' onclick="redeemReward(' + i + ')">Canjear</button>';
+    rewardsContainer.appendChild(el);
+  });
+  const log = getRedemptionLog();
+  const logContainer = document.getElementById('logContainer');
+  logContainer.innerHTML = '';
+  if (log.length === 0) { logContainer.innerHTML = '<div class="empty-state">Todavía no has canjeado nada.</div>'; }
+  else {
+    log.forEach(entry => {
+      const d = new Date(entry.date + 'T00:00:00');
+      const dateLabel = d.toLocaleDateString('es-CL', { day: 'numeric', month: 'short' });
+      const row = document.createElement('div');
+      row.className = 'log-row';
+      row.innerHTML = '<span>' + entry.name + ' · ' + dateLabel + '</span><span class="log-cost">-' + entry.cost + '</span>';
+      logContainer.appendChild(row);
+    });
+  }
+}
+
+function getISOWeekKey(d) {
+  const date = new Date(d.getTime());
+  date.setHours(0,0,0,0);
+  date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
+  const week1 = new Date(date.getFullYear(), 0, 4);
+  const weekNum = 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + (week1.getDay() + 6) % 7) / 7);
+  return date.getFullYear() + '-W' + weekNum;
+}
+
+function renderSemana() {
+  const today = new Date();
+  const last7 = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(today); d.setDate(d.getDate() - i);
+    last7.push(d.toISOString().slice(0,10));
+  }
+  const max = maxDayTotal();
+  let weekTotal = 0; let daysActive = 0; let daysFull = 0;
+  last7.forEach(date => {
+    const stored = localStorage.getItem('habitState_' + date);
+    if (stored) {
+      const total = computeDayTotal(JSON.parse(stored));
+      if (total > 0) { weekTotal += total; daysActive++; }
+      if (total === max) daysFull++;
+    }
+  });
+  const avg = Math.round(weekTotal / 7);
+
+  document.getElementById('weekSummary').innerHTML =
+    '<div class="week-stat"><div class="week-stat-value">' + weekTotal + '</div><div class="week-stat-label">Puntos semana</div></div>' +
+    '<div class="week-stat"><div class="week-stat-value">' + avg + '</div><div class="week-stat-label">Promedio/día</div></div>' +
+    '<div class="week-stat"><div class="week-stat-value">' + daysFull + '/7</div><div class="week-stat-label">Días 100%</div></div>';
+
+  const weekKey = getISOWeekKey(today);
+  const stored = localStorage.getItem('weekReview_' + weekKey);
+  if (stored) {
+    const review = JSON.parse(stored);
+    document.getElementById('reviewWorked').value = review.worked || '';
+    document.getElementById('reviewFailed').value = review.failed || '';
+    document.getElementById('reviewAdjust').value = review.adjust || '';
+  } else {
+    document.getElementById('reviewWorked').value = '';
+    document.getElementById('reviewFailed').value = '';
+    document.getElementById('reviewAdjust').value = '';
+  }
+  document.getElementById('savedBadge').style.display = 'none';
+}
+
+function saveWeekReview() {
+  const weekKey = getISOWeekKey(new Date());
+  const review = {
+    worked: document.getElementById('reviewWorked').value,
+    failed: document.getElementById('reviewFailed').value,
+    adjust: document.getElementById('reviewAdjust').value
+  };
+  localStorage.setItem('weekReview_' + weekKey, JSON.stringify(review));
+  document.getElementById('savedBadge').style.display = 'block';
+  syncToCloud();
+}
+
+function renderHabitBlock(habit, container, state) {
+  const maxPts = habitMaxPoints(habit);
+  let habitPts = 0; let allRequiredDone = true;
+  const subtasksHtml = habit.subtasks.map((sub, i) => {
+    const subKey = habit.id + '_' + i;
+    const done = !!state.subtaskDone[subKey];
+    if (done && !sub.optional) habitPts += sub.pts;
+    if (!sub.optional && !done) allRequiredDone = false;
+    const checkClass = done ? (sub.optional ? 'optional-done' : 'done') : '';
+    return '<div class="subtask ' + (sub.optional ? 'optional' : '') + '" onclick="toggleSubtask(\'' + habit.id + '\', ' + i + ')">' +
+      '<div class="subtask-check ' + checkClass + '" style="--card-color:' + habit.color + '">' + (done ? '✓' : '') + '</div>' +
+      '<span>' + sub.name + (sub.optional ? ' (opcional)' : '') + '</span>' +
+      (sub.pts > 0 ? '<span class="subtask-pts">+' + sub.pts + '</span>' : '') +
+      '</div>';
+  }).join('');
+
+  const el = document.createElement('div');
+  el.className = 'habit-item' + (allRequiredDone ? ' completed' : '');
+  el.style.setProperty('--card-color', habit.color);
+  el.style.setProperty('--card-bg-done', habit.bgDone);
+  el.innerHTML =
+    '<div class="habit-header"><span class="habit-name">' + habit.name + '</span><span class="habit-points">' + habitPts + '/' + maxPts + '</span></div>' +
+    '<div class="habit-anchor">' + habit.anchor + '</div>' +
+    '<div class="subtasks">' + subtasksHtml + '</div>';
+  container.appendChild(el);
+  return habitPts;
+}
+
+function render() {
+  const state = getState();
+  document.getElementById('identityLine').textContent = identityPhrases[new Date().getDay()];
+
+  const morningContainer = document.getElementById('morningContainer');
+  morningContainer.innerHTML = '';
+  const eveningContainer = document.getElementById('eveningContainer');
+  eveningContainer.innerHTML = '';
+
+  let totalPoints = 0;
+  habitsMorning.forEach(h => totalPoints += renderHabitBlock(h, morningContainer, state));
+  habitsEvening.forEach(h => totalPoints += renderHabitBlock(h, eveningContainer, state));
+
+  const dailyContainer = document.getElementById('dailyHabitsContainer');
+  dailyContainer.innerHTML = '';
+  dailyHabits.forEach(d => {
+    const subKey = d.id + '_0';
+    const done = !!state.subtaskDone[subKey];
+    if (done) totalPoints += d.pts;
+    const el = document.createElement('div');
+    el.className = 'daily-card' + (done ? ' completed' : '');
+    el.style.setProperty('--card-color', d.color);
+    el.style.setProperty('--card-bg-done', d.bgDone);
+    el.innerHTML = '<div class="daily-name">' + d.name + '</div><button class="daily-check" style="--card-color:' + d.color + '" onclick="toggleDaily(\'' + d.id + '\')">' + (done ? '✓ +' + d.pts : '+' + d.pts + ' pts') + '</button>';
+    dailyContainer.appendChild(el);
+  });
+
+  document.getElementById('totalPoints').textContent = totalPoints;
+  document.getElementById('streakDays').textContent = getStreak();
+  markDateTouched(state);
+}
+
+initCloudSync();
+</script>
+</body>
+</html>
