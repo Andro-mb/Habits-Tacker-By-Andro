@@ -8,139 +8,119 @@
 <meta name="apple-mobile-web-app-title" content="Mi rutina">
 <meta name="theme-color" content="#F5F4EF">
 <title>Mi rutina</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <style>
   :root {
-    --surface-0: #F5F4EF;
-    --surface-1: #FFFFFF;
-    --border: rgba(0,0,0,0.09);
-    --border-strong: rgba(0,0,0,0.18);
-    --text-primary: #1A1A18;
-    --text-secondary: #6B6B63;
-    --text-muted: #9A9A90;
-    --fill-accent: #2F6FDE;
-    --on-accent: #FFFFFF;
-    --text-accent: #2F6FDE;
-    --border-accent: #2F6FDE;
-    --bg-success: #E3F3E9;
-    --text-success: #1F6B3D;
-    --border-success: #B8DDC4;
-    --fill-success: #3B8F5C;
-    --bg-warning: #FDF3DC;
-    --text-warning: #8A5A10;
-    --border-warning: #EBCB86;
-    --fill-warning: #E8B94D;
-    --fill-disabled: #DDDDD8;
-    --text-disabled: #A6A69E;
-    --text-danger: #C0473F;
+    --surface-0: #F5F4EF; --surface-1: #FFFFFF;
+    --border: rgba(0,0,0,0.09); --border-strong: rgba(0,0,0,0.18);
+    --text-primary: #1A1A18; --text-secondary: #6B6B63; --text-muted: #9A9A90;
+    --fill-accent: #2F6FDE; --on-accent: #FFFFFF; --text-accent: #2F6FDE; --border-accent: #2F6FDE;
+    --bg-success: #E3F3E9; --text-success: #1F6B3D; --border-success: #B8DDC4; --fill-success: #3B8F5C;
+    --bg-warning: #FDF3DC; --text-warning: #8A5A10; --border-warning: #EBCB86; --fill-warning: #E8B94D;
+    --fill-disabled: #DDDDD8; --text-disabled: #A6A69E; --text-danger: #C0473F;
   }
-
   @media (prefers-color-scheme: dark) {
     :root {
-      --surface-0: #171715;
-      --surface-1: #211F1D;
-      --border: rgba(255,255,255,0.10);
-      --border-strong: rgba(255,255,255,0.18);
-      --text-primary: #F2F1EC;
-      --text-secondary: #B3B2A9;
-      --text-muted: #82817A;
-      --fill-accent: #5B93F0;
-      --on-accent: #0E1420;
-      --text-accent: #7FADF7;
-      --border-accent: #5B93F0;
-      --bg-success: rgba(59,143,92,0.18);
-      --text-success: #7FCB99;
-      --border-success: rgba(59,143,92,0.4);
-      --fill-success: #3B8F5C;
-      --bg-warning: rgba(232,185,77,0.16);
-      --text-warning: #E8B94D;
-      --border-warning: rgba(232,185,77,0.4);
-      --fill-warning: #E8B94D;
-      --fill-disabled: #33322F;
-      --text-disabled: #6B6A63;
-      --text-danger: #E0736A;
+      --surface-0: #171715; --surface-1: #211F1D;
+      --border: rgba(255,255,255,0.10); --border-strong: rgba(255,255,255,0.18);
+      --text-primary: #F2F1EC; --text-secondary: #B3B2A9; --text-muted: #82817A;
+      --fill-accent: #5B93F0; --on-accent: #0E1420; --text-accent: #7FADF7; --border-accent: #5B93F0;
+      --bg-success: rgba(59,143,92,0.18); --text-success: #7FCB99; --border-success: rgba(59,143,92,0.4); --fill-success: #3B8F5C;
+      --bg-warning: rgba(232,185,77,0.16); --text-warning: #E8B94D; --border-warning: rgba(232,185,77,0.4); --fill-warning: #E8B94D;
+      --fill-disabled: #33322F; --text-disabled: #6B6A63; --text-danger: #E0736A;
     }
   }
-
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { background: var(--surface-0); }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    color: var(--text-primary);
-    padding-bottom: 2rem;
-    max-width: 480px;
-    margin: 0 auto;
-  }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: var(--text-primary); padding-bottom: 2rem; max-width: 480px; margin: 0 auto; }
 
   .header { background: var(--surface-1); border-bottom: 0.5px solid var(--border); padding: 1.1rem 1rem 0.9rem; }
   .header h1 { font-size: 19px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; }
   .identity-line { font-size: 13px; color: var(--text-secondary); font-style: italic; }
+  .header-actions { display: flex; gap: 6px; }
+  .icon-btn { background:transparent; border:0.5px solid var(--border); color: var(--text-secondary); font-size: 14px; padding: 6px 10px; border-radius: 6px; cursor:pointer; white-space:nowrap; }
 
   .tabs { display: flex; gap: 5px; padding: 0.85rem 1rem 0; }
-  .tab {
-    flex: 1; text-align: center; padding: 9px 2px; border-radius: 8px; font-size: 12px; font-weight: 500;
-    background: var(--surface-1); border: 0.5px solid var(--border); color: var(--text-secondary); cursor: pointer;
-  }
+  .tab { flex: 1; text-align: center; padding: 9px 2px; border-radius: 8px; font-size: 12px; font-weight: 500; background: var(--surface-1); border: 0.5px solid var(--border); color: var(--text-secondary); cursor: pointer; }
   .tab.active { background: var(--fill-accent); color: var(--on-accent); border-color: var(--fill-accent); }
+
+  .day-nav { display: flex; align-items: center; justify-content: center; gap: 14px; padding: 0.9rem 1rem 0.2rem; }
+  .day-nav button { background: var(--surface-1); border: 0.5px solid var(--border); color: var(--text-primary); width: 34px; height: 34px; border-radius: 8px; font-size: 16px; cursor: pointer; }
+  .day-nav button:disabled { opacity: 0.3; cursor: not-allowed; }
+  .day-nav-label { font-size: 14px; font-weight: 600; color: var(--text-primary); min-width: 150px; text-align: center; text-transform: capitalize; }
+
+  .progress-wrap { display: flex; justify-content: center; padding: 0.6rem 1rem 0.2rem; }
+  .progress-ring-label { font-size: 11px; fill: var(--text-secondary); }
+  .progress-ring-value { font-size: 20px; font-weight: 700; fill: var(--text-primary); }
 
   .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 1rem; }
   .stat-card { background: var(--surface-1); border: 0.5px solid var(--border-strong); border-radius: 12px; padding: 0.9rem; text-align: center; }
   .stat-value { font-size: 24px; font-weight: 600; color: var(--fill-accent); display: block; }
   .stat-label { font-size: 11px; color: var(--text-secondary); margin-top: 3px; }
   .streak { color: #C9781F; }
+  .freeze-note { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
 
   .habits-section { padding: 0 1rem; }
-  .section-title { font-size: 12px; font-weight: 600; color: var(--text-secondary); margin: 14px 0 8px 2px; }
+  .section-title { font-size: 12px; font-weight: 600; color: var(--text-secondary); margin: 14px 0 8px 2px; text-transform: uppercase; letter-spacing: 0.03em; }
 
-  .habit-item {
-    background: var(--surface-1); border: 0.5px solid var(--border); border-left: 4px solid var(--card-color, var(--border));
-    border-radius: 10px; padding: 0.9rem; margin-bottom: 10px;
-  }
+  .habit-item { background: var(--surface-1); border: 0.5px solid var(--border); border-left: 4px solid var(--card-color, var(--border)); border-radius: 10px; padding: 0.9rem; margin-bottom: 10px; overflow: hidden; }
   .habit-item.completed { background: var(--card-bg-done, var(--bg-success)); }
+  .habit-item.inactive { opacity: 0.5; }
 
-  .habit-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 2px; }
+  .habit-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; gap: 8px; }
   .habit-name { font-weight: 600; font-size: 15px; color: var(--text-primary); }
   .habit-anchor { font-size: 11px; color: var(--text-muted); margin-bottom: 10px; }
 
-  .habit-points {
-    font-size: 12px; font-weight: 600; background: var(--card-color, var(--fill-accent));
-    color: #fff; padding: 3px 9px; border-radius: 20px; white-space: nowrap;
-  }
+  .habit-points { font-size: 12px; font-weight: 600; background: var(--card-color, var(--fill-accent)); color: #fff; padding: 3px 9px; border-radius: 20px; white-space: nowrap; }
+  .edit-toggle-btn { background: transparent; border: none; color: var(--text-muted); font-size: 15px; cursor: pointer; padding: 2px 4px; }
 
   .subtasks { display: flex; flex-direction: column; gap: 9px; }
-  .subtask { display: flex; align-items: center; font-size: 14px; color: var(--text-primary); gap: 10px; cursor: pointer; }
+  .subtask { display: flex; align-items: center; font-size: 14px; color: var(--text-primary); gap: 6px; position: relative; touch-action: pan-y; }
+  .subtask-clickable { cursor: pointer; flex: 1; display: flex; align-items: center; gap: 10px; min-width: 0; transition: transform 0.15s ease; }
+  .subtask-clickable span { overflow-wrap: anywhere; }
   .subtask.optional { color: var(--text-muted); font-style: italic; }
 
-  .subtask-check {
-    width: 20px; height: 20px; min-width: 20px; border: 2px solid var(--border-strong);
-    border-radius: 5px; display: flex; align-items: center; justify-content: center;
-    font-size: 12px; background: var(--surface-0);
-  }
+  .subtask-check { width: 20px; height: 20px; min-width: 20px; border: 2px solid var(--border-strong); border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: 12px; background: var(--surface-0); }
   .subtask-check.done { background: var(--card-color, var(--fill-success)); border-color: var(--card-color); color: #fff; }
   .subtask-check.optional-done { background: var(--fill-warning); border-color: var(--fill-warning); color: var(--text-primary); }
-  .subtask-pts { margin-left: auto; font-size: 11px; color: var(--text-muted); }
+  .subtask-pts { margin-left: auto; font-size: 11px; color: var(--text-muted); white-space: nowrap; }
+  .subtask-mini-btn { background: transparent; border: none; font-size: 12px; cursor: pointer; padding: 4px; min-width: 20px; }
+  .subtask-edit-btn { color: var(--text-muted); }
+  .subtask-del { color: var(--text-danger); }
+  .swipe-hint { font-size: 9px; color: var(--text-muted); text-align: center; padding: 4px 0 2px; }
+
+  .edit-panel { margin-top: 12px; padding-top: 12px; border-top: 0.5px dashed var(--border-strong); display: flex; flex-direction: column; gap: 8px; }
+  .edit-row-btn { background: var(--surface-0); border: 0.5px solid var(--border); color: var(--text-secondary); font-size: 12px; padding: 8px; border-radius: 8px; cursor: pointer; text-align: center; }
+  .edit-row-btn.danger { color: var(--text-danger); }
 
   .daily-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 8px; }
-  .daily-card {
-    background: var(--surface-1); border: 0.5px solid var(--border);
-    border-top: 4px solid var(--card-color, var(--border)); border-radius: 10px; padding: 0.75rem; text-align: center;
-  }
+  .daily-card { background: var(--surface-1); border: 0.5px solid var(--border); border-top: 4px solid var(--card-color, var(--border)); border-radius: 10px; padding: 0.75rem; text-align: center; position: relative; }
   .daily-card.completed { background: var(--card-bg-done, var(--bg-success)); }
+  .daily-card.inactive { opacity: 0.5; }
   .daily-name { font-size: 12px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; }
-  .daily-check {
-    width: 100%; padding: 7px; border-radius: 7px; border: none; font-size: 11px;
-    font-weight: 600; cursor: pointer; background: var(--card-color, var(--fill-accent)); color: #fff;
-  }
+  .daily-check { width: 100%; padding: 7px; border-radius: 7px; border: none; font-size: 11px; font-weight: 600; cursor: pointer; background: var(--card-color, var(--fill-accent)); color: #fff; }
+  .daily-edit-btn { position: absolute; top: 4px; right: 4px; background: transparent; border: none; color: var(--text-muted); font-size: 13px; cursor: pointer; padding: 3px; }
+  .daily-edit-panel { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
 
-  .reset-btn {
-    width: 100%; background: transparent; border: 0.5px solid var(--border); color: var(--text-secondary);
-    padding: 11px; border-radius: 8px; margin: 4px 0 1rem; cursor: pointer; font-size: 12px;
-  }
+  .add-btn { width: 100%; background: transparent; border: 0.5px dashed var(--border-strong); color: var(--text-secondary); padding: 10px; border-radius: 10px; font-size: 12px; cursor: pointer; margin: 4px 0 14px; }
+
+  .reset-btn { width: 100%; background: transparent; border: 0.5px solid var(--border-danger, var(--text-danger)); color: var(--text-danger); padding: 11px; border-radius: 8px; margin: 4px 0 1rem; cursor: pointer; font-size: 12px; }
+
+  .inline-form { background: var(--surface-1); border: 0.5px solid var(--border-strong); border-radius: 12px; padding: 1rem; margin: 4px 0 14px; display: flex; flex-direction: column; gap: 9px; }
+  .inline-form-label { font-size: 11px; font-weight: 600; color: var(--text-secondary); margin-bottom: -3px; }
+  .inline-form input, .inline-form select { width: 100%; background: var(--surface-0); border: 0.5px solid var(--border); border-radius: 8px; padding: 10px; font-size: 13px; color: var(--text-primary); font-family: inherit; }
+  .color-swatches { display: flex; gap: 8px; flex-wrap: wrap; }
+  .color-swatch { width: 28px; height: 28px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; }
+  .color-swatch.selected { border-color: var(--text-primary); }
+  .inline-form-actions { display: flex; gap: 8px; margin-top: 4px; }
+  .inline-form-actions button { flex: 1; padding: 10px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border: none; }
+  .btn-primary { background: var(--fill-accent); color: var(--on-accent); }
+  .btn-secondary { background: transparent; color: var(--text-secondary); border: 0.5px solid var(--border) !important; }
 
   .history-list { padding: 0 1rem 1rem; display: flex; flex-direction: column; gap: 8px; }
-  .history-row {
-    display: flex; align-items: center; justify-content: space-between; background: var(--surface-1);
-    border: 0.5px solid var(--border); border-radius: 10px; padding: 11px 13px;
-  }
+  .history-row { display: flex; align-items: center; justify-content: space-between; background: var(--surface-1); border: 0.5px solid var(--border); border-radius: 10px; padding: 11px 13px; }
   .history-date { font-size: 13px; font-weight: 600; color: var(--text-primary); }
   .history-bar-wrap { flex: 1; margin: 0 10px; height: 7px; background: var(--surface-0); border-radius: 4px; overflow: hidden; }
   .history-bar { height: 100%; background: var(--fill-accent); }
@@ -148,31 +128,19 @@
 
   .empty-state { text-align: center; color: var(--text-muted); font-size: 13px; padding: 2rem 1rem; }
 
-  .balance-card {
-    margin: 0 1rem 1rem; background: var(--bg-warning); border: 0.5px solid var(--border-warning);
-    border-radius: 12px; padding: 1.1rem; text-align: center;
-  }
+  .balance-card { margin: 0 1rem 1rem; background: var(--bg-warning); border: 0.5px solid var(--border-warning); border-radius: 12px; padding: 1.1rem; text-align: center; }
   .balance-value { font-size: 28px; font-weight: 600; color: var(--text-warning); }
   .balance-label { font-size: 11px; color: var(--text-secondary); margin-top: 3px; }
 
   .rewards-list { padding: 0 1rem 1rem; display: flex; flex-direction: column; gap: 9px; }
-  .reward-card {
-    background: var(--surface-1); border: 0.5px solid var(--border); border-left: 4px solid var(--card-color, var(--border));
-    border-radius: 10px; padding: 0.9rem; display: flex; align-items: center; justify-content: space-between; gap: 10px;
-  }
+  .reward-card { background: var(--surface-1); border: 0.5px solid var(--border); border-left: 4px solid var(--card-color, var(--border)); border-radius: 10px; padding: 0.9rem; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
   .reward-name { font-size: 14px; font-weight: 600; color: var(--text-primary); }
   .reward-cost { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
-  .redeem-btn {
-    background: var(--card-color, var(--fill-accent)); color: #fff; border: none; padding: 9px 14px;
-    border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap;
-  }
+  .redeem-btn { background: var(--card-color, var(--fill-accent)); color: #fff; border: none; padding: 9px 14px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; }
   .redeem-btn:disabled { background: var(--fill-disabled); color: var(--text-disabled); cursor: not-allowed; }
 
   .redemption-log-title { padding: 0.4rem 1rem; font-size: 12px; font-weight: 600; color: var(--text-secondary); }
-  .log-row {
-    display: flex; justify-content: space-between; padding: 9px 13px; background: var(--surface-1);
-    border: 0.5px solid var(--border); border-radius: 10px; font-size: 12px; margin-bottom: 6px;
-  }
+  .log-row { display: flex; justify-content: space-between; padding: 9px 13px; background: var(--surface-1); border: 0.5px solid var(--border); border-radius: 10px; font-size: 12px; margin-bottom: 6px; }
   .log-cost { color: var(--text-danger); font-weight: 600; }
 
   .week-section { padding: 0 1rem 1rem; }
@@ -182,20 +150,22 @@
   .week-stat-label { font-size: 10px; color: var(--text-secondary); margin-top: 2px; }
 
   .review-label { font-size: 13px; font-weight: 600; color: var(--text-primary); margin: 14px 0 6px; }
-  .review-input {
-    width: 100%; background: var(--surface-1); border: 0.5px solid var(--border); border-radius: 8px;
-    padding: 10px; font-size: 13px; color: var(--text-primary); font-family: inherit; resize: none; min-height: 60px;
-  }
-
-  .save-review-btn {
-    width: 100%; background: var(--fill-accent); color: var(--on-accent); border: none; padding: 11px;
-    border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; margin-top: 14px;
-  }
+  .review-input { width: 100%; background: var(--surface-1); border: 0.5px solid var(--border); border-radius: 8px; padding: 10px; font-size: 13px; color: var(--text-primary); font-family: inherit; resize: none; min-height: 60px; }
+  .save-review-btn { width: 100%; background: var(--fill-accent); color: var(--on-accent); border: none; padding: 11px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; margin-top: 14px; }
   .saved-badge { font-size: 11px; color: var(--text-success); margin-top: 8px; text-align: center; }
+
+  .toast { position: fixed; top: 14px; left: 50%; transform: translateX(-50%) translateY(-40px); background: var(--surface-1); border: 0.5px solid var(--border-strong); color: var(--text-primary); padding: 12px 18px; border-radius: 30px; font-size: 13px; font-weight: 600; box-shadow: 0 6px 20px rgba(0,0,0,0.2); z-index: 10000; opacity: 0; transition: all 0.35s ease; max-width: 88%; text-align: center; }
+  .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+  .config-back { display:flex; align-items:center; gap:8px; padding: 0.9rem 1rem 0.2rem; }
+  .config-back button { background: transparent; border: none; color: var(--fill-accent); font-size: 14px; font-weight: 600; cursor: pointer; padding: 4px 0; }
+  .config-section-title { font-size: 12px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.04em; margin: 18px 0 8px 2px; padding: 0 1rem; }
+
+  .onboarding-overlay { position: fixed; inset: 0; background: var(--surface-0); z-index: 9999; overflow-y: auto; padding: 3rem 1.5rem; }
+  .onboard-item { display:flex; align-items:center; gap:12px; background: var(--surface-1); border: 0.5px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 10px; }
+  .onboard-check { width: 22px; height: 22px; min-width:22px; border: 2px solid var(--border-strong); border-radius: 6px; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+  .onboard-check.checked { background: var(--fill-accent); border-color: var(--fill-accent); color: #fff; }
 </style>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 </head>
 <body>
 
@@ -213,6 +183,13 @@
   <button onclick="handleRegister()" style="width:100%; background: transparent; color: var(--text-secondary); border: 0.5px solid var(--border); padding: 12px; border-radius: 8px; font-size: 14px; cursor:pointer;">Crear cuenta nueva</button>
 </div>
 
+<div id="onboardingScreen" class="onboarding-overlay" style="display:none;">
+  <h1 style="font-size: 20px; font-weight: 700; margin-bottom: 6px;">Empecemos simple</h1>
+  <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 20px;">Elige con qué quieres partir. Puedes activar el resto después, desde Configuración — mejor empezar chico y ganar, que empezar grande y fallar.</p>
+  <div id="onboardList"></div>
+  <button class="btn-primary" style="width:100%; padding:13px; border:none; border-radius:10px; font-size:14px; font-weight:600; cursor:pointer; margin-top:10px;" onclick="finishOnboarding()">Empezar</button>
+</div>
+
 <div id="appContainer" style="display:none;">
 
 <div class="header">
@@ -221,12 +198,15 @@
       <h1>Mi rutina</h1>
       <div class="identity-line" id="identityLine"></div>
     </div>
-    <button onclick="handleLogout()" style="background:transparent; border:0.5px solid var(--border); color: var(--text-secondary); font-size: 11px; padding: 6px 10px; border-radius: 6px; cursor:pointer; white-space:nowrap;">Salir</button>
+    <div class="header-actions">
+      <button class="icon-btn" onclick="openConfig()">⚙</button>
+      <button class="icon-btn" onclick="handleLogout()">Salir</button>
+    </div>
   </div>
   <div style="font-size: 11px; color: var(--text-muted); margin-top: 6px;" id="syncStatus">Conectando a la nube...</div>
 </div>
 
-<div class="tabs">
+<div class="tabs" id="tabsBar">
   <div class="tab active" id="tabHoy" onclick="switchTab('hoy')">Hoy</div>
   <div class="tab" id="tabSemana" onclick="switchTab('semana')">Semana</div>
   <div class="tab" id="tabHistorial" onclick="switchTab('historial')">Historial</div>
@@ -234,23 +214,24 @@
 </div>
 
 <div id="viewHoy">
+  <div class="day-nav">
+    <button id="dayPrevBtn" onclick="changeDay(-1)">‹</button>
+    <span class="day-nav-label" id="dayLabel">Hoy</span>
+    <button id="dayNextBtn" onclick="changeDay(1)">›</button>
+  </div>
+  <div class="progress-wrap"><svg id="progressRing" width="120" height="120" viewBox="0 0 120 120"></svg></div>
   <div class="stats">
     <div class="stat-card">
       <span class="stat-value" id="totalPoints">0</span>
-      <span class="stat-label">Puntos hoy</span>
+      <span class="stat-label">Puntos del día</span>
     </div>
     <div class="stat-card">
       <span class="stat-value streak" id="streakDays">0</span>
       <span class="stat-label">Racha</span>
+      <div class="freeze-note" id="freezeNote"></div>
     </div>
   </div>
-  <div class="habits-section">
-    <div id="morningContainer"></div>
-    <div id="eveningContainer"></div>
-    <div class="section-title">Hábitos diarios</div>
-    <div class="daily-grid" id="dailyHabitsContainer"></div>
-    <button class="reset-btn" onclick="resetDay()">Reiniciar día</button>
-  </div>
+  <div class="habits-section" id="habitsSection"></div>
 </div>
 
 <div id="viewSemana" style="display:none;">
@@ -281,7 +262,14 @@
   <div class="rewards-list" id="logContainer" style="padding-top:0;"></div>
 </div>
 
+<div id="viewConfig" style="display:none;">
+  <div class="config-back"><button onclick="closeConfig()">‹ Volver</button></div>
+  <div class="habits-section" id="configSection"></div>
 </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
 
 <script>
 const firebaseConfig = {
@@ -299,150 +287,231 @@ const db = firebase.firestore();
 let currentUid = null;
 let applyingRemoteData = false;
 let syncTimer = null;
+let selectedDate = null;
+let editingRoutines = new Set();
+let editingDaily = new Set();
+let editingRoutineMeta = new Set();
+let editingDailyMeta = new Set();
+let showAddRoutineForm = false;
+let showAddDailyForm = false;
+let colorSelections = {};
+let editingSubtaskKey = null;
+let showAddSubtaskFor = null;
+let inConfigView = false;
+let swipeStartX = null;
+let swipeMoved = false;
 
-const LOCAL_KEY_PREFIXES = ['habitState_', 'weekReview_'];
-const LOCAL_KEY_EXACT = ['habitHistoryIndex', 'habitStreak', 'lastStreakDate', 'redeemedTotal', 'redemptionLog'];
+const LOCAL_KEY_PREFIXES = ['habitState_', 'weekReview_', 'bonus_'];
+const LOCAL_KEY_EXACT = ['habitHistoryIndex', 'habitStreak', 'lastStreakDate', 'redeemedTotal', 'redemptionLog', 'habitsConfig', 'streakFreezes', 'onboardingDone'];
 
-function collectAllLocalData() {
-  const data = {};
-  for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
-    if (LOCAL_KEY_EXACT.includes(key) || LOCAL_KEY_PREFIXES.some(p => key.startsWith(p))) {
-      data[key] = localStorage.getItem(key);
-    }
-  }
-  return data;
+const CARD_COLORS = ['#C9781F', '#6E56CF', '#1D8FA5', '#3B8F5C', '#C0473F', '#B8862F', '#0E7C7B', '#8E44AD', '#D46A9F', '#4A6FA5'];
+
+function genId() { return Math.random().toString(36).slice(2, 9); }
+function tint(hex, opacity) {
+  const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
+  return 'rgba(' + r + ',' + g + ',' + b + ',' + opacity + ')';
+}
+function vibrate(ms) { if (navigator.vibrate) { try { navigator.vibrate(ms); } catch(e){} } }
+
+function showToast(text, duration) {
+  const el = document.getElementById('toast');
+  el.textContent = text;
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), duration || 2600);
 }
 
-function restoreLocalData(data) {
-  applyingRemoteData = true;
-  Object.keys(data).forEach(key => {
-    if (key !== '_updatedAt') localStorage.setItem(key, data[key]);
-  });
-  applyingRemoteData = false;
-}
-
-function setSyncStatus(text) {
-  const el = document.getElementById('syncStatus');
-  if (el) el.textContent = text;
-}
-
-function syncToCloud() {
-  if (!currentUid || applyingRemoteData) return;
-  clearTimeout(syncTimer);
-  syncTimer = setTimeout(() => {
-    const data = collectAllLocalData();
-    data._updatedAt = Date.now();
-    setSyncStatus('Guardando...');
-    db.collection('userData').doc(currentUid).set(data)
-      .then(() => setSyncStatus('☁️ Sincronizado'))
-      .catch(() => setSyncStatus('No se pudo guardar (revisa conexión)'));
-  }, 400);
-}
-
-function togglePasswordVisibility() {
-  const input = document.getElementById('loginPassword');
-  const btn = document.getElementById('togglePwBtn');
-  if (input.type === 'password') {
-    input.type = 'text';
-    btn.textContent = 'Ocultar';
-  } else {
-    input.type = 'password';
-    btn.textContent = 'Ver';
-  }
-}
-
-function handleLogin() {
-  const email = document.getElementById('loginEmail').value.trim();
-  const password = document.getElementById('loginPassword').value;
-  const errEl = document.getElementById('loginError');
-  errEl.style.display = 'none';
-  if (!email || !password) {
-    errEl.textContent = 'Ingresa tu correo y contraseña.';
-    errEl.style.display = 'block';
-    return;
-  }
-  auth.signInWithEmailAndPassword(email, password).catch(err => {
-    errEl.textContent = traducirErrorFirebase(err.code);
-    errEl.style.display = 'block';
-  });
-}
-
-function handleRegister() {
-  const email = document.getElementById('loginEmail').value.trim();
-  const password = document.getElementById('loginPassword').value;
-  const errEl = document.getElementById('loginError');
-  errEl.style.display = 'none';
-  if (!email || !password) {
-    errEl.textContent = 'Ingresa tu correo y contraseña.';
-    errEl.style.display = 'block';
-    return;
-  }
-  if (password.length < 6) {
-    errEl.textContent = 'La contraseña debe tener al menos 6 caracteres.';
-    errEl.style.display = 'block';
-    return;
-  }
-  auth.createUserWithEmailAndPassword(email, password).catch(err => {
-    errEl.textContent = traducirErrorFirebase(err.code);
-    errEl.style.display = 'block';
-  });
-}
-
-function handleLogout() {
-  if (confirm('¿Cerrar sesión?')) {
-    auth.signOut();
-  }
-}
-
-function traducirErrorFirebase(code) {
-  const map = {
-    'auth/invalid-email': 'Correo inválido.',
-    'auth/user-not-found': 'No existe una cuenta con ese correo.',
-    'auth/wrong-password': 'Contraseña incorrecta.',
-    'auth/invalid-credential': 'Correo o contraseña incorrectos.',
-    'auth/email-already-in-use': 'Ya existe una cuenta con ese correo. Inicia sesión.',
-    'auth/weak-password': 'La contraseña debe tener al menos 6 caracteres.',
-    'auth/too-many-requests': 'Demasiados intentos. Espera un momento.'
+function getDefaultConfig() {
+  return {
+    routines: [
+      {
+        id: 'morning', name: 'Rutina matutina', anchor: 'Ancla: apenas suena la alarma', active: true,
+        color: '#C9781F', category: 'Rutinas diarias',
+        subtasks: [
+          { id: genId(), name: 'Despertarse a tiempo', pts: 15 },
+          { id: genId(), name: 'Luz solar directa (5-10 min)', pts: 15 },
+          { id: genId(), name: 'Vaso de agua', pts: 10 },
+          { id: genId(), name: 'Estiramientos', pts: 15 },
+          { id: genId(), name: 'Ducha y aseo personal', pts: 15 },
+          { id: genId(), name: 'Desayuno', pts: 15 },
+          { id: genId(), name: 'Prioridad #1 del día', pts: 15 },
+          { id: genId(), name: 'Meditación', pts: 0, optional: true }
+        ]
+      },
+      {
+        id: 'evening', name: 'Rutina nocturna', anchor: 'Ancla: después de la cena', active: true,
+        color: '#6E56CF', category: 'Rutinas diarias',
+        subtasks: [
+          { id: genId(), name: 'Preparar cosas para mañana', pts: 20 },
+          { id: genId(), name: 'Sin pantallas (hora límite)', pts: 20 },
+          { id: genId(), name: 'Ducha', pts: 15 },
+          { id: genId(), name: 'Meditación / oración', pts: 15 },
+          { id: genId(), name: 'Escribir qué aprendí y qué hice bien', pts: 30 }
+        ]
+      }
+    ],
+    dailyHabits: [
+      { id: 'reading', name: 'Lectura · 30 min', color: '#1D8FA5', pts: 75, active: true, category: 'Hábitos diarios' },
+      { id: 'sport', name: 'Deporte · 30 min', color: '#3B8F5C', pts: 75, active: true, category: 'Hábitos diarios' }
+    ]
   };
-  return map[code] || 'Ocurrió un error. Intenta de nuevo.';
 }
 
-function initCloudSync() {
-  auth.onAuthStateChanged(user => {
-    if (!user) {
-      currentUid = null;
-      document.getElementById('loginScreen').style.display = 'block';
-      document.getElementById('appContainer').style.display = 'none';
-      return;
-    }
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('appContainer').style.display = 'block';
-    currentUid = user.uid;
-    db.collection('userData').doc(currentUid).get().then(doc => {
-      if (doc.exists) {
-        restoreLocalData(doc.data());
-      } else {
-        syncToCloud();
-      }
-      setSyncStatus('☁️ Sincronizado');
-      render();
-    }).catch(err => {
-      setSyncStatus('Sin conexión a la nube (' + err.code + ') — revisa las reglas de Firestore');
-      render();
-    });
-    db.collection('userData').doc(currentUid).onSnapshot(doc => {
-      if (!doc.exists) return;
-      const remote = doc.data();
-      if (remote._updatedAt && remote._updatedAt !== window._lastAppliedUpdate) {
-        window._lastAppliedUpdate = remote._updatedAt;
-        restoreLocalData(remote);
-        render();
-      }
-    }, err => {
-      setSyncStatus('Nube desconectada (' + err.code + ')');
-    });
+function getConfig() {
+  const stored = localStorage.getItem('habitsConfig');
+  if (!stored) { const def = getDefaultConfig(); localStorage.setItem('habitsConfig', JSON.stringify(def)); return def; }
+  try {
+    const parsed = JSON.parse(stored);
+    parsed.routines.forEach(r => { if (!r.category) r.category = 'Rutinas diarias'; });
+    parsed.dailyHabits.forEach(d => { if (!d.category) d.category = 'Hábitos diarios'; });
+    return parsed;
+  } catch (e) { return getDefaultConfig(); }
+}
+
+function saveConfig(config) { localStorage.setItem('habitsConfig', JSON.stringify(config)); }
+
+function getAllCategories(config) {
+  const set = new Set();
+  config.routines.forEach(r => set.add(r.category || 'Rutinas diarias'));
+  config.dailyHabits.forEach(d => set.add(d.category || 'Hábitos diarios'));
+  return Array.from(set);
+}
+
+function getCategoryOrder(config) {
+  if (!config.categoryOrder) config.categoryOrder = [];
+  const existing = getAllCategories(config);
+  let changed = false;
+  existing.forEach(c => { if (!config.categoryOrder.includes(c)) { config.categoryOrder.push(c); changed = true; } });
+  const filtered = config.categoryOrder.filter(c => existing.includes(c));
+  if (filtered.length !== config.categoryOrder.length) changed = true;
+  config.categoryOrder = filtered;
+  if (changed) saveConfig(config);
+  return config.categoryOrder;
+}
+
+function moveCategory(name, direction) {
+  const config = getConfig();
+  const order = getCategoryOrder(config);
+  const idx = order.indexOf(name);
+  const newIdx = idx + direction;
+  if (newIdx < 0 || newIdx >= order.length) return;
+  const tmp = order[idx]; order[idx] = order[newIdx]; order[newIdx] = tmp;
+  config.categoryOrder = order;
+  saveConfig(config); renderConfig(); syncToCloud();
+}
+
+function moveRoutine(routineId, direction) {
+  const config = getConfig();
+  const routine = config.routines.find(r => r.id === routineId);
+  if (!routine) return;
+  const cat = routine.category || 'Rutinas diarias';
+  const sameCat = config.routines.filter(r => (r.category || 'Rutinas diarias') === cat);
+  const posInCat = sameCat.indexOf(routine);
+  const targetPos = posInCat + direction;
+  if (targetPos < 0 || targetPos >= sameCat.length) return;
+  const neighbor = sameCat[targetPos];
+  const idxA = config.routines.indexOf(routine);
+  const idxB = config.routines.indexOf(neighbor);
+  config.routines[idxA] = neighbor; config.routines[idxB] = routine;
+  saveConfig(config); renderConfig(); syncToCloud();
+}
+
+function moveDaily(dailyId, direction) {
+  const config = getConfig();
+  const item = config.dailyHabits.find(d => d.id === dailyId);
+  if (!item) return;
+  const cat = item.category || 'Hábitos diarios';
+  const sameCat = config.dailyHabits.filter(d => (d.category || 'Hábitos diarios') === cat);
+  const posInCat = sameCat.indexOf(item);
+  const targetPos = posInCat + direction;
+  if (targetPos < 0 || targetPos >= sameCat.length) return;
+  const neighbor = sameCat[targetPos];
+  const idxA = config.dailyHabits.indexOf(item);
+  const idxB = config.dailyHabits.indexOf(neighbor);
+  config.dailyHabits[idxA] = neighbor; config.dailyHabits[idxB] = item;
+  saveConfig(config); renderConfig(); syncToCloud();
+}
+
+function moveSubtask(routineId, subId, direction) {
+  const config = getConfig();
+  const r = config.routines.find(x => x.id === routineId);
+  if (!r) return;
+  const idx = r.subtasks.findIndex(s => s.id === subId);
+  const newIdx = idx + direction;
+  if (newIdx < 0 || newIdx >= r.subtasks.length) return;
+  const tmp = r.subtasks[idx]; r.subtasks[idx] = r.subtasks[newIdx]; r.subtasks[newIdx] = tmp;
+  saveConfig(config); renderConfig(); syncToCloud();
+}
+
+function groupByCategory(items, config) {
+  const order = config ? getCategoryOrder(config) : null;
+  const groups = {}; const seenOrder = [];
+  items.forEach(item => {
+    const cat = item.category || 'General';
+    if (!groups[cat]) { groups[cat] = []; seenOrder.push(cat); }
+    groups[cat].push(item);
   });
+  const finalOrder = order ? order.filter(c => groups[c]) : seenOrder;
+  return finalOrder.map(cat => ({ cat: cat, items: groups[cat] }));
+}
+
+function colorSwatchesHtml(pickerId, selectedColor) {
+  if (!(pickerId in colorSelections)) colorSelections[pickerId] = selectedColor || CARD_COLORS[0];
+  const current = colorSelections[pickerId];
+  return '<div class="color-swatches" id="' + pickerId + '">' + CARD_COLORS.map(c =>
+    '<div class="color-swatch' + (c === current ? ' selected' : '') + '" style="background:' + c + '" onclick="selectSwatchColor(\'' + pickerId + '\',\'' + c + '\')"></div>'
+  ).join('') + '</div>';
+}
+
+function selectSwatchColor(pickerId, color) {
+  colorSelections[pickerId] = color;
+  const container = document.getElementById(pickerId);
+  if (container) {
+    Array.from(container.children).forEach(child => {
+      child.classList.toggle('selected', child.getAttribute('style').indexOf(color) !== -1);
+    });
+  }
+}
+
+function categorySelectHtml(id, config, current) {
+  const categories = getAllCategories(config);
+  const isNew = current && !categories.includes(current);
+  let opts = categories.map(c => '<option value="' + c.replace(/"/g,'&quot;') + '"' + (c === current && !isNew ? ' selected' : '') + '>' + c + '</option>').join('');
+  opts += '<option value="__new__">+ Nueva categoría...</option>';
+  return '<select id="' + id + '" onchange="handleCategorySelectChange(\'' + id + '\')">' + opts + '</select>' +
+    '<input id="' + id + '_new" placeholder="Nombre de la categoría nueva" style="display:' + (isNew ? 'block' : 'none') + '; margin-top:6px;" value="' + (isNew ? current.replace(/"/g,'&quot;') : '') + '">';
+}
+
+function handleCategorySelectChange(id) {
+  const sel = document.getElementById(id);
+  const inp = document.getElementById(id + '_new');
+  inp.style.display = sel.value === '__new__' ? 'block' : 'none';
+  if (sel.value === '__new__') inp.focus();
+}
+
+function getCategoryValue(id, fallback) {
+  const sel = document.getElementById(id);
+  if (!sel) return fallback;
+  if (sel.value === '__new__') {
+    const inp = document.getElementById(id + '_new');
+    return (inp && inp.value.trim()) || fallback;
+  }
+  return sel.value;
+}
+
+const rewards = [
+  { name: 'Sesión de gaming (1h)', mult: 0.30, color: '#6E56CF' },
+  { name: 'Ver una película', mult: 0.45, color: '#1D8FA5' },
+  { name: 'Antojo / comprita pequeña', mult: 0.60, color: '#B8862F' },
+  { name: 'Comida favorita para pedir', mult: 0.75, color: '#C9781F' },
+  { name: 'Salir con amigos', mult: 1.00, color: '#C0473F' },
+  { name: 'Tarde libre sin rutina', mult: 1.30, color: '#3B8F5C' }
+];
+
+function getRewardCost(reward, config) {
+  const max = maxDayTotal(config);
+  if (max <= 0) return 0;
+  return Math.max(5, Math.round(reward.mult * max / 5) * 5);
 }
 
 const identityPhrases = [
@@ -454,49 +523,6 @@ const identityPhrases = [
   'Hoy actúo como alguien que cierra bien sus días.',
   'Hoy actúo como alguien que también descansa con intención.'
 ];
-
-const habitsMorning = [{
-  id: 'morning', name: 'Rutina matutina', anchor: 'Ancla: apenas suena la alarma',
-  color: '#C9781F', bgDone: 'rgba(201,120,31,0.14)',
-  subtasks: [
-    { name: 'Despertarse a tiempo', pts: 15 },
-    { name: 'Luz solar directa (5-10 min)', pts: 15 },
-    { name: 'Vaso de agua', pts: 10 },
-    { name: 'Estiramientos', pts: 15 },
-    { name: 'Ducha y aseo personal', pts: 15 },
-    { name: 'Desayuno', pts: 15 },
-    { name: 'Prioridad #1 del día', pts: 15 },
-    { name: 'Meditación', pts: 0, optional: true }
-  ]
-}];
-
-const habitsEvening = [{
-  id: 'evening', name: 'Rutina nocturna', anchor: 'Ancla: después de la cena',
-  color: '#6E56CF', bgDone: 'rgba(110,86,207,0.14)',
-  subtasks: [
-    { name: 'Preparar cosas para mañana', pts: 20 },
-    { name: 'Sin pantallas (hora límite)', pts: 20 },
-    { name: 'Ducha', pts: 15 },
-    { name: 'Meditación / oración', pts: 15 },
-    { name: 'Escribir qué aprendí y qué hice bien', pts: 30 }
-  ]
-}];
-
-const dailyHabits = [
-  { id: 'reading', name: 'Lectura · 30 min', color: '#1D8FA5', bgDone: 'rgba(29,143,165,0.14)', pts: 75 },
-  { id: 'sport', name: 'Deporte · 30 min', color: '#3B8F5C', bgDone: 'rgba(59,143,92,0.14)', pts: 75 }
-];
-
-const rewards = [
-  { name: 'Salir con amigos', cost: 300, color: '#C0473F' },
-  { name: 'Sesión de gaming (1h)', cost: 100, color: '#6E56CF' },
-  { name: 'Ver una película', cost: 150, color: '#1D8FA5' },
-  { name: 'Antojo / comprita pequeña', cost: 200, color: '#B8862F' },
-  { name: 'Tarde libre sin rutina', cost: 400, color: '#3B8F5C' },
-  { name: 'Comida favorita para pedir', cost: 250, color: '#C9781F' }
-];
-
-function habitMaxPoints(habit) { return habit.subtasks.reduce((sum, s) => sum + s.pts, 0); }
 
 function playSound() {
   try {
@@ -528,100 +554,410 @@ function confetti() {
 }
 
 function todayKey() { return new Date().toISOString().slice(0,10); }
-
-function getState() {
-  const key = todayKey();
-  const stored = localStorage.getItem('habitState_' + key);
-  return stored ? JSON.parse(stored) : { date: key, subtaskDone: {} };
+function addDaysToKey(dateStr, delta) {
+  const d = new Date(dateStr + 'T00:00:00');
+  d.setDate(d.getDate() + delta);
+  return d.toISOString().slice(0,10);
 }
 
+function getState(date) {
+  const stored = localStorage.getItem('habitState_' + date);
+  return stored ? JSON.parse(stored) : { date: date, subtaskDone: {} };
+}
 function saveState(state) { localStorage.setItem('habitState_' + state.date, JSON.stringify(state)); }
 function getHistory() { const s = localStorage.getItem('habitHistoryIndex'); return s ? JSON.parse(s) : []; }
 function saveHistory(dates) { localStorage.setItem('habitHistoryIndex', JSON.stringify(dates)); }
 function getStreak() { const s = localStorage.getItem('habitStreak'); return s ? JSON.parse(s) : 0; }
 function getRedeemedTotal() { const s = localStorage.getItem('redeemedTotal'); return s ? JSON.parse(s) : 0; }
 function getRedemptionLog() { const s = localStorage.getItem('redemptionLog'); return s ? JSON.parse(s) : []; }
+function getFreezes() { const s = localStorage.getItem('streakFreezes'); if (s === null) { localStorage.setItem('streakFreezes', '2'); return 2; } return JSON.parse(s); }
+function setFreezes(n) { localStorage.setItem('streakFreezes', JSON.stringify(Math.max(0, n))); }
+function getBonus(date) { const s = localStorage.getItem('bonus_' + date); return s ? JSON.parse(s) : 0; }
+function setBonus(date, val) { localStorage.setItem('bonus_' + date, JSON.stringify(val)); }
 
-function allHabits() { return [...habitsMorning, ...habitsEvening]; }
-
-function allTaskDefs() {
+function allTaskDefs(config) {
   const defs = [];
-  allHabits().forEach(h => h.subtasks.forEach((s, i) => defs.push({ key: h.id + '_' + i, pts: s.pts, optional: s.optional })));
-  dailyHabits.forEach(d => defs.push({ key: d.id + '_0', pts: d.pts, optional: false }));
+  config.routines.filter(r => r.active !== false).forEach(r => r.subtasks.forEach(s => defs.push({ key: r.id + '_' + s.id, pts: s.pts, optional: !!s.optional })));
+  config.dailyHabits.filter(d => d.active !== false).forEach(d => defs.push({ key: 'daily_' + d.id, pts: d.pts, optional: false }));
   return defs;
 }
 
-function computeDayTotal(state) {
+function computeDayTotal(state, config) {
   let total = 0;
-  allTaskDefs().forEach(def => { if (state.subtaskDone[def.key] && !def.optional) total += def.pts; });
-  return total;
+  allTaskDefs(config).forEach(def => { if (state.subtaskDone[def.key] && !def.optional) total += def.pts; });
+  return total + getBonus(state.date);
 }
 
-function maxDayTotal() { return allTaskDefs().reduce((sum, d) => sum + (d.optional ? 0 : d.pts), 0); }
+function maxDayTotal(config) { return allTaskDefs(config).reduce((sum, d) => sum + (d.optional ? 0 : d.pts), 0); }
 
 function getLifetimePoints() {
-  const dates = getHistory(); let total = 0;
-  dates.forEach(date => { const s = localStorage.getItem('habitState_' + date); if (s) total += computeDayTotal(JSON.parse(s)); });
+  const dates = getHistory(); let total = 0; const config = getConfig();
+  dates.forEach(date => { const s = localStorage.getItem('habitState_' + date); if (s) total += computeDayTotal(JSON.parse(s), config); });
   return total;
 }
 
 function getAvailableBalance() { return getLifetimePoints() - getRedeemedTotal(); }
 
-function markDateTouched(state) {
+function markDateTouched(date) {
   const dates = getHistory();
-  if (!dates.includes(state.date)) { dates.push(state.date); saveHistory(dates); }
+  if (!dates.includes(date)) { dates.push(date); saveHistory(dates); }
 }
 
-function afterToggleEffects(state) {
-  const total = computeDayTotal(state); const max = maxDayTotal();
-  if (total === max) {
-    confetti();
-    const lastStreakDate = localStorage.getItem('lastStreakDate');
-    if (lastStreakDate !== state.date) {
+function afterToggleEffects(state, config) {
+  const total = computeDayTotal(state, config); const max = maxDayTotal(config);
+  if (max <= 0 || total < max) return;
+  const lastStreakDate = localStorage.getItem('lastStreakDate');
+  if (lastStreakDate === state.date) return;
+
+  confetti();
+
+  if (!lastStreakDate) {
+    localStorage.setItem('habitStreak', '1');
+  } else {
+    const expectedPrev = addDaysToKey(state.date, -1);
+    if (lastStreakDate === expectedPrev || lastStreakDate === state.date) {
       localStorage.setItem('habitStreak', JSON.stringify(getStreak() + 1));
-      localStorage.setItem('lastStreakDate', state.date);
+    } else {
+      const freezes = getFreezes();
+      if (freezes > 0) {
+        setFreezes(freezes - 1);
+        localStorage.setItem('habitStreak', JSON.stringify(getStreak() + 1));
+        showToast('❄️ Usaste un congelamiento para mantener tu racha');
+      } else {
+        localStorage.setItem('habitStreak', '1');
+      }
     }
+  }
+  localStorage.setItem('lastStreakDate', state.date);
+
+  if (Math.random() < 0.25) {
+    const bonusAmt = 10 + Math.floor(Math.random() * 31);
+    setBonus(state.date, getBonus(state.date) + bonusAmt);
+    setTimeout(confetti, 300);
+    showToast('🎉 ¡Bonus sorpresa! +' + bonusAmt + ' puntos', 3200);
+  } else {
+    showToast('✨ ¡Día completo!');
   }
 }
 
-function toggleSubtask(habitId, idx) {
-  const state = getState();
-  const subKey = habitId + '_' + idx;
+function toggleSubtask(routineId, subId, optional) {
+  const state = getState(selectedDate);
+  const subKey = routineId + '_' + subId;
   state.subtaskDone[subKey] = !state.subtaskDone[subKey];
   saveState(state);
-  const habit = allHabits().find(h => h.id === habitId);
-  const sub = habit.subtasks[idx];
-  if (state.subtaskDone[subKey] && !sub.optional) playSound();
-  markDateTouched(state); afterToggleEffects(state); render(); syncToCloud();
+  if (state.subtaskDone[subKey]) { vibrate(20); if (!optional) playSound(); }
+  const config = getConfig();
+  markDateTouched(state.date); afterToggleEffects(state, config); render(); syncToCloud();
 }
 
 function toggleDaily(dailyId) {
-  const state = getState();
-  const subKey = dailyId + '_0';
+  const state = getState(selectedDate);
+  const subKey = 'daily_' + dailyId;
   state.subtaskDone[subKey] = !state.subtaskDone[subKey];
   saveState(state);
-  if (state.subtaskDone[subKey]) playSound();
-  markDateTouched(state); afterToggleEffects(state); render(); syncToCloud();
+  if (state.subtaskDone[subKey]) { vibrate(20); playSound(); }
+  const config = getConfig();
+  markDateTouched(state.date); afterToggleEffects(state, config); render(); syncToCloud();
 }
 
-function redeemReward(idx) {
-  const reward = rewards[idx];
-  const balance = getAvailableBalance();
-  if (balance < reward.cost) return;
-  if (!confirm('¿Canjear "' + reward.name + '" por ' + reward.cost + ' puntos?')) return;
-  localStorage.setItem('redeemedTotal', JSON.stringify(getRedeemedTotal() + reward.cost));
-  const log = getRedemptionLog();
-  log.unshift({ name: reward.name, cost: reward.cost, date: todayKey() });
-  localStorage.setItem('redemptionLog', JSON.stringify(log.slice(0, 20)));
-  confetti(); playSound(); renderRecompensas(); syncToCloud();
+// ---- Swipe para completar ----
+function swipeStart(e) { swipeStartX = e.touches[0].clientX; swipeMoved = false; }
+function swipeMove(e) {
+  if (swipeStartX === null) return;
+  const dx = e.touches[0].clientX - swipeStartX;
+  if (Math.abs(dx) > 8) swipeMoved = true;
+}
+function swipeEndSub(e, routineId, subId, optional) {
+  if (swipeStartX === null) return;
+  const dx = e.changedTouches[0].clientX - swipeStartX;
+  swipeStartX = null;
+  if (Math.abs(dx) > 55) { e.preventDefault(); toggleSubtask(routineId, subId, optional); }
+}
+function swipeEndDaily(e, dailyId) {
+  if (swipeStartX === null) return;
+  const dx = e.changedTouches[0].clientX - swipeStartX;
+  swipeStartX = null;
+  if (Math.abs(dx) > 55) { e.preventDefault(); toggleDaily(dailyId); }
+}
+
+function changeDay(delta) {
+  const newDate = addDaysToKey(selectedDate, delta);
+  const minDate = addDaysToKey(todayKey(), -1);
+  const maxDate = addDaysToKey(todayKey(), 1);
+  if (newDate < minDate || newDate > maxDate) return;
+  selectedDate = newDate;
+  render();
 }
 
 function resetDay() {
-  if (confirm('¿Seguro que quieres reiniciar el día de hoy?')) {
-    localStorage.removeItem('habitState_' + todayKey()); render(); syncToCloud();
-  }
+  if (!confirm('¿Reiniciar este día? Vas a perder lo marcado.')) return;
+  if (!confirm('Confirma de nuevo: esta acción no se puede deshacer. ¿Reiniciar igual?')) return;
+  localStorage.removeItem('habitState_' + selectedDate);
+  localStorage.removeItem('bonus_' + selectedDate);
+  render(); renderConfig(); syncToCloud();
 }
 
+function resetFreezes() {
+  setFreezes(2);
+  showToast('❄️ Congelamientos restablecidos a 2');
+  renderConfig(); syncToCloud();
+}
+
+// ---- Config: mostrar/ocultar ----
+function openConfig() {
+  inConfigView = true;
+  document.getElementById('tabsBar').style.display = 'none';
+  ['viewHoy','viewSemana','viewHistorial','viewRecompensas'].forEach(id => document.getElementById(id).style.display = 'none');
+  document.getElementById('viewConfig').style.display = 'block';
+  renderConfig();
+}
+function closeConfig() {
+  inConfigView = false;
+  document.getElementById('tabsBar').style.display = 'flex';
+  document.getElementById('viewConfig').style.display = 'none';
+  switchTab('hoy');
+}
+
+// ---- Edición de rutinas ----
+function toggleEditRoutine(id) { if (editingRoutines.has(id)) editingRoutines.delete(id); else editingRoutines.add(id); renderConfig(); }
+function toggleEditDaily(id) { if (editingDaily.has(id)) editingDaily.delete(id); else editingDaily.add(id); renderConfig(); }
+function toggleEditRoutineMeta(id) { if (editingRoutineMeta.has(id)) editingRoutineMeta.delete(id); else editingRoutineMeta.add(id); renderConfig(); }
+function toggleEditDailyMeta(id) { if (editingDailyMeta.has(id)) editingDailyMeta.delete(id); else editingDailyMeta.add(id); renderConfig(); }
+function toggleAddRoutineForm() { showAddRoutineForm = !showAddRoutineForm; renderConfig(); }
+function toggleAddDailyForm() { showAddDailyForm = !showAddDailyForm; renderConfig(); }
+function toggleAddSubtaskForm(routineId) { showAddSubtaskFor = showAddSubtaskFor === routineId ? null : routineId; renderConfig(); }
+function startEditSubtask(routineId, subId) { editingSubtaskKey = routineId + '_' + subId; renderConfig(); }
+function cancelEditSubtask() { editingSubtaskKey = null; renderConfig(); }
+
+function submitNewRoutine() {
+  const title = document.getElementById('newRoutineTitle').value.trim();
+  if (!title) { alert('Ponle un título a la rutina.'); return; }
+  const anchor = document.getElementById('newRoutineAnchor').value.trim();
+  const category = getCategoryValue('newRoutineCategory', 'Rutinas diarias');
+  const color = colorSelections['newRoutineColorPicker'] || CARD_COLORS[0];
+  const config = getConfig();
+  config.routines.push({ id: genId(), name: title, anchor: anchor, active: true, color: color, category: category, subtasks: [] });
+  saveConfig(config);
+  showAddRoutineForm = false;
+  delete colorSelections['newRoutineColorPicker'];
+  renderConfig(); syncToCloud();
+}
+
+function normalizePool(pool, pinnedId, pinnedValue) {
+  if (pool.length === 0) return;
+  pinnedValue = Math.max(0, Math.min(100, pinnedValue));
+  const others = pool.filter(it => it.id !== pinnedId);
+  if (others.length === 0) { pool[0].pts = 100; return; }
+  const remaining = 100 - pinnedValue;
+  const othersSum = others.reduce((s, it) => s + it.pts, 0);
+  let assigned = 0;
+  others.forEach((it, i) => {
+    if (i === others.length - 1) { it.pts = Math.max(0, remaining - assigned); return; }
+    const share = othersSum > 0 ? Math.round(remaining * (it.pts / othersSum)) : Math.round(remaining / others.length);
+    it.pts = Math.max(0, share);
+    assigned += it.pts;
+  });
+  const pinned = pool.find(it => it.id === pinnedId);
+  if (pinned) pinned.pts = pinnedValue;
+}
+
+function rescalePoolToFill(pool) {
+  if (pool.length === 0) return;
+  const sum = pool.reduce((s, it) => s + it.pts, 0);
+  if (sum === 0) {
+    const base = Math.floor(100 / pool.length); const rem = 100 - base * pool.length;
+    pool.forEach((it, i) => { it.pts = base + (i < rem ? 1 : 0); });
+    return;
+  }
+  let assigned = 0;
+  pool.forEach((it, i) => {
+    if (i === pool.length - 1) { it.pts = 100 - assigned; return; }
+    const share = Math.round(100 * (it.pts / sum));
+    it.pts = share; assigned += share;
+  });
+}
+
+function submitNewDaily() {
+  const title = document.getElementById('newDailyTitle').value.trim();
+  if (!title) { alert('Ponle un título al hábito.'); return; }
+  let pts = parseInt(document.getElementById('newDailyPoints').value, 10);
+  if (isNaN(pts) || pts < 0) pts = 50;
+  const category = getCategoryValue('newDailyCategory', 'Hábitos diarios');
+  const color = colorSelections['newDailyColorPicker'] || CARD_COLORS[1];
+  const config = getConfig();
+  const newDaily = { id: genId(), name: title, pts: pts, color: color, active: true, category: category };
+  config.dailyHabits.push(newDaily);
+  const pool = config.dailyHabits.filter(d => (d.category || 'Hábitos diarios') === category);
+  normalizePool(pool, newDaily.id, pts);
+  saveConfig(config);
+  showAddDailyForm = false;
+  delete colorSelections['newDailyColorPicker'];
+  renderConfig(); syncToCloud();
+}
+
+function deleteRoutine(routineId) {
+  if (!confirm('¿Eliminar esta rutina completa? Esta acción no se puede deshacer.')) return;
+  const config = getConfig();
+  config.routines = config.routines.filter(r => r.id !== routineId);
+  saveConfig(config); renderConfig(); syncToCloud();
+}
+
+function toggleRoutineActive(routineId) {
+  const config = getConfig();
+  const r = config.routines.find(x => x.id === routineId);
+  if (r) r.active = r.active === false ? true : false;
+  saveConfig(config); renderConfig(); syncToCloud();
+}
+
+function saveRoutineMeta(routineId) {
+  const config = getConfig();
+  const r = config.routines.find(x => x.id === routineId);
+  if (!r) return;
+  const titleEl = document.getElementById('metaTitle_' + routineId);
+  const anchorEl = document.getElementById('metaAnchor_' + routineId);
+  if (titleEl.value.trim()) r.name = titleEl.value.trim();
+  r.anchor = anchorEl.value.trim();
+  r.category = getCategoryValue('metaCategory_' + routineId, 'Rutinas diarias');
+  r.color = colorSelections['metaColor_' + routineId] || r.color;
+  saveConfig(config);
+  editingRoutineMeta.delete(routineId);
+  renderConfig(); syncToCloud();
+}
+
+function submitNewSubtask(routineId) {
+  const nameEl = document.getElementById('asubName_' + routineId);
+  const name = nameEl.value.trim();
+  if (!name) { alert('Ponle un nombre a la tarea.'); return; }
+  const desc = document.getElementById('asubDesc_' + routineId).value.trim();
+  let pts = parseInt(document.getElementById('asubPoints_' + routineId).value, 10);
+  if (isNaN(pts) || pts < 0) pts = 10;
+  const config = getConfig();
+  const r = config.routines.find(x => x.id === routineId);
+  if (r) {
+    const newSub = { id: genId(), name: name, desc: desc, pts: pts };
+    r.subtasks.push(newSub);
+    const pool = r.subtasks.filter(s => !s.optional);
+    normalizePool(pool, newSub.id, pts);
+  }
+  saveConfig(config);
+  showAddSubtaskFor = null;
+  renderConfig(); syncToCloud();
+}
+
+function saveSubtaskEdit(routineId, subId) {
+  const config = getConfig();
+  const r = config.routines.find(x => x.id === routineId);
+  const s = r ? r.subtasks.find(x => x.id === subId) : null;
+  if (!s) return;
+  const nameEl = document.getElementById('subEditName_' + subId);
+  const descEl = document.getElementById('subEditDesc_' + subId);
+  if (nameEl.value.trim()) s.name = nameEl.value.trim();
+  s.desc = descEl.value.trim();
+  if (!s.optional) {
+    const ptsEl = document.getElementById('subEditPoints_' + subId);
+    const newPts = parseInt(ptsEl.value, 10);
+    if (!isNaN(newPts) && newPts >= 0) {
+      s.pts = newPts;
+      const pool = r.subtasks.filter(x => !x.optional);
+      normalizePool(pool, subId, newPts);
+    }
+  }
+  saveConfig(config);
+  editingSubtaskKey = null;
+  renderConfig(); syncToCloud();
+}
+
+function deleteSubtask(routineId, subId) {
+  const config = getConfig();
+  const r = config.routines.find(x => x.id === routineId);
+  if (r) {
+    r.subtasks = r.subtasks.filter(s => s.id !== subId);
+    const pool = r.subtasks.filter(s => !s.optional);
+    rescalePoolToFill(pool);
+  }
+  saveConfig(config); renderConfig(); syncToCloud();
+}
+
+function deleteDailyHabit(id) {
+  if (!confirm('¿Eliminar este hábito diario?')) return;
+  const config = getConfig();
+  const item = config.dailyHabits.find(d => d.id === id);
+  const cat = item ? (item.category || 'Hábitos diarios') : null;
+  config.dailyHabits = config.dailyHabits.filter(d => d.id !== id);
+  if (cat) {
+    const pool = config.dailyHabits.filter(d => (d.category || 'Hábitos diarios') === cat);
+    rescalePoolToFill(pool);
+  }
+  saveConfig(config); renderConfig(); syncToCloud();
+}
+
+function toggleDailyActive(id) {
+  const config = getConfig();
+  const d = config.dailyHabits.find(x => x.id === id);
+  if (d) d.active = d.active === false ? true : false;
+  saveConfig(config); renderConfig(); syncToCloud();
+}
+
+function saveDailyMeta(dailyId) {
+  const config = getConfig();
+  const d = config.dailyHabits.find(x => x.id === dailyId);
+  if (!d) return;
+  const titleEl = document.getElementById('dmetaTitle_' + dailyId);
+  const ptsEl = document.getElementById('dmetaPoints_' + dailyId);
+  if (titleEl.value.trim()) d.name = titleEl.value.trim();
+  const pts = parseInt(ptsEl.value, 10);
+  d.category = getCategoryValue('dmetaCategory_' + dailyId, 'Hábitos diarios');
+  d.color = colorSelections['dmetaColor_' + dailyId] || d.color;
+  if (!isNaN(pts) && pts >= 0) {
+    d.pts = pts;
+    const pool = config.dailyHabits.filter(x => (x.category || 'Hábitos diarios') === d.category);
+    normalizePool(pool, dailyId, pts);
+  }
+  saveConfig(config);
+  editingDailyMeta.delete(dailyId);
+  renderConfig(); syncToCloud();
+}
+
+function autobalanceRoutine(routineId) {
+  const config = getConfig();
+  const r = config.routines.find(x => x.id === routineId);
+  if (!r) return;
+  const targets = r.subtasks.filter(s => !s.optional);
+  if (targets.length === 0) { alert('Esta rutina no tiene tareas con puntaje para repartir.'); return; }
+  const base = Math.floor(100 / targets.length);
+  const remainder = 100 - base * targets.length;
+  targets.forEach((s, i) => { s.pts = base + (i < remainder ? 1 : 0); });
+  saveConfig(config); renderConfig(); syncToCloud();
+  showToast('Rutina repartida a 100 puntos');
+}
+
+function autobalanceDailyCategory(catName) {
+  const config = getConfig();
+  const targets = config.dailyHabits.filter(d => (d.category || 'Hábitos diarios') === catName);
+  if (targets.length === 0) return;
+  const base = Math.floor(100 / targets.length);
+  const remainder = 100 - base * targets.length;
+  targets.forEach((d, i) => { d.pts = base + (i < remainder ? 1 : 0); });
+  saveConfig(config); renderConfig(); syncToCloud();
+  showToast('Categoría repartida a 100 puntos');
+}
+
+// ---- Recompensas ----
+function redeemReward(idx) {
+  const reward = rewards[idx];
+  const config = getConfig();
+  const cost = getRewardCost(reward, config);
+  const balance = getAvailableBalance();
+  if (balance < cost) return;
+  if (!confirm('¿Canjear "' + reward.name + '" por ' + cost + ' puntos?')) return;
+  localStorage.setItem('redeemedTotal', JSON.stringify(getRedeemedTotal() + cost));
+  const log = getRedemptionLog();
+  log.unshift({ name: reward.name, cost: cost, date: todayKey() });
+  localStorage.setItem('redemptionLog', JSON.stringify(log.slice(0, 20)));
+  confetti(); playSound(); vibrate(30); renderRecompensas(); syncToCloud();
+}
+
+// ---- Tabs ----
 function switchTab(tab) {
   ['Hoy','Semana','Historial','Recompensas'].forEach(t => {
     document.getElementById('tab' + t).classList.toggle('active', t.toLowerCase() === tab);
@@ -630,6 +966,7 @@ function switchTab(tab) {
   if (tab === 'historial') renderHistory();
   if (tab === 'recompensas') renderRecompensas();
   if (tab === 'semana') renderSemana();
+  if (tab === 'hoy') render();
 }
 
 function renderHistory() {
@@ -637,13 +974,14 @@ function renderHistory() {
   const container = document.getElementById('historyContainer');
   container.innerHTML = '';
   if (dates.length === 0) { container.innerHTML = '<div class="empty-state">Aún no hay registros.</div>'; return; }
-  const max = maxDayTotal();
+  const config = getConfig();
+  const max = maxDayTotal(config);
   dates.slice(0, 30).forEach(date => {
     const stored = localStorage.getItem('habitState_' + date);
     if (!stored) return;
     const state = JSON.parse(stored);
-    const total = computeDayTotal(state);
-    const pct = Math.round((total / max) * 100);
+    const total = computeDayTotal(state, config);
+    const pct = max > 0 ? Math.min(100, Math.round((total / max) * 100)) : 0;
     const d = new Date(date + 'T00:00:00');
     const dateLabel = d.toLocaleDateString('es-CL', { weekday: 'short', day: 'numeric', month: 'short' });
     const row = document.createElement('div');
@@ -655,15 +993,17 @@ function renderHistory() {
 
 function renderRecompensas() {
   const balance = getAvailableBalance();
+  const config = getConfig();
   document.getElementById('balanceValue').textContent = balance;
   const rewardsContainer = document.getElementById('rewardsContainer');
   rewardsContainer.innerHTML = '';
   rewards.forEach((reward, i) => {
-    const canAfford = balance >= reward.cost;
+    const cost = getRewardCost(reward, config);
+    const canAfford = balance >= cost;
     const el = document.createElement('div');
     el.className = 'reward-card';
     el.style.setProperty('--card-color', reward.color);
-    el.innerHTML = '<div><div class="reward-name">' + reward.name + '</div><div class="reward-cost">' + reward.cost + ' puntos</div></div><button class="redeem-btn" style="--card-color:' + reward.color + '" ' + (canAfford ? '' : 'disabled') + ' onclick="redeemReward(' + i + ')">Canjear</button>';
+    el.innerHTML = '<div><div class="reward-name">' + reward.name + '</div><div class="reward-cost">' + cost + ' puntos · ' + Math.round(reward.mult*100) + '% de un día</div></div><button class="redeem-btn" style="--card-color:' + reward.color + '" ' + (canAfford ? '' : 'disabled') + ' onclick="redeemReward(' + i + ')">Canjear</button>';
     rewardsContainer.appendChild(el);
   });
   const log = getRedemptionLog();
@@ -694,27 +1034,23 @@ function getISOWeekKey(d) {
 function renderSemana() {
   const today = new Date();
   const last7 = [];
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(today); d.setDate(d.getDate() - i);
-    last7.push(d.toISOString().slice(0,10));
-  }
-  const max = maxDayTotal();
+  for (let i = 0; i < 7; i++) { const d = new Date(today); d.setDate(d.getDate() - i); last7.push(d.toISOString().slice(0,10)); }
+  const config = getConfig();
+  const max = maxDayTotal(config);
   let weekTotal = 0; let daysActive = 0; let daysFull = 0;
   last7.forEach(date => {
     const stored = localStorage.getItem('habitState_' + date);
     if (stored) {
-      const total = computeDayTotal(JSON.parse(stored));
+      const total = computeDayTotal(JSON.parse(stored), config);
       if (total > 0) { weekTotal += total; daysActive++; }
-      if (total === max) daysFull++;
+      if (max > 0 && total >= max) daysFull++;
     }
   });
   const avg = Math.round(weekTotal / 7);
-
   document.getElementById('weekSummary').innerHTML =
     '<div class="week-stat"><div class="week-stat-value">' + weekTotal + '</div><div class="week-stat-label">Puntos semana</div></div>' +
     '<div class="week-stat"><div class="week-stat-value">' + avg + '</div><div class="week-stat-label">Promedio/día</div></div>' +
     '<div class="week-stat"><div class="week-stat-value">' + daysFull + '/7</div><div class="week-stat-label">Días 100%</div></div>';
-
   const weekKey = getISOWeekKey(today);
   const stored = localStorage.getItem('weekReview_' + weekKey);
   if (stored) {
@@ -742,64 +1078,431 @@ function saveWeekReview() {
   syncToCloud();
 }
 
-function renderHabitBlock(habit, container, state) {
-  const maxPts = habitMaxPoints(habit);
-  let habitPts = 0; let allRequiredDone = true;
-  const subtasksHtml = habit.subtasks.map((sub, i) => {
-    const subKey = habit.id + '_' + i;
+// ---- Progreso circular ----
+function renderProgressRing(pct) {
+  const svg = document.getElementById('progressRing');
+  if (!svg) return;
+  const r = 50, cx = 60, cy = 60, circ = 2 * Math.PI * r;
+  const clamped = Math.max(0, Math.min(100, pct));
+  const offset = circ - (clamped / 100) * circ;
+  svg.innerHTML =
+    '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="var(--border)" stroke-width="10"/>' +
+    '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="var(--fill-accent)" stroke-width="10" stroke-linecap="round" stroke-dasharray="' + circ + '" stroke-dashoffset="' + offset + '" transform="rotate(-90 ' + cx + ' ' + cy + ')" style="transition: stroke-dashoffset 0.4s ease;"/>' +
+    '<text x="60" y="56" text-anchor="middle" class="progress-ring-value">' + clamped + '%</text>' +
+    '<text x="60" y="74" text-anchor="middle" class="progress-ring-label">del día</text>';
+}
+
+// ---- Tarjetas de rutina y hábito diario (usadas en Hoy y en Config) ----
+function renderRoutineCard(routine, state, editable) {
+  const maxPts = routine.subtasks.reduce((sum, s) => sum + (s.optional ? 0 : s.pts), 0);
+  let habitPts = 0; let allRequiredDone = routine.subtasks.length > 0;
+  const isEditing = editable && editingRoutines.has(routine.id);
+  const isEditingMeta = editingRoutineMeta.has(routine.id);
+  const isActive = routine.active !== false;
+  const config = getConfig();
+
+  const subtasksHtml = routine.subtasks.map(sub => {
+    const subKey = routine.id + '_' + sub.id;
     const done = !!state.subtaskDone[subKey];
     if (done && !sub.optional) habitPts += sub.pts;
     if (!sub.optional && !done) allRequiredDone = false;
+
+    if (isEditing && editingSubtaskKey === subKey) {
+      return '<div class="inline-form" style="margin:0;">' +
+        '<div class="inline-form-label">Nombre</div><input id="subEditName_' + sub.id + '" value="' + sub.name.replace(/"/g,'&quot;') + '">' +
+        '<div class="inline-form-label">Descripción breve (opcional)</div><input id="subEditDesc_' + sub.id + '" value="' + (sub.desc || '').replace(/"/g,'&quot;') + '">' +
+        (sub.optional ? '' : '<div class="inline-form-label">Puntos</div><input id="subEditPoints_' + sub.id + '" type="number" value="' + sub.pts + '">') +
+        '<div class="inline-form-actions"><button class="btn-primary" onclick="saveSubtaskEdit(\'' + routine.id + '\',\'' + sub.id + '\')">Guardar</button><button class="btn-secondary" onclick="cancelEditSubtask()">Cancelar</button></div>' +
+        '</div>';
+    }
+
     const checkClass = done ? (sub.optional ? 'optional-done' : 'done') : '';
-    return '<div class="subtask ' + (sub.optional ? 'optional' : '') + '" onclick="toggleSubtask(\'' + habit.id + '\', ' + i + ')">' +
-      '<div class="subtask-check ' + checkClass + '" style="--card-color:' + habit.color + '">' + (done ? '✓' : '') + '</div>' +
-      '<span>' + sub.name + (sub.optional ? ' (opcional)' : '') + '</span>' +
+    const clickAttrs = editable ? '' :
+      ' ontouchstart="swipeStart(event)" ontouchmove="swipeMove(event)" ontouchend="swipeEndSub(event,\'' + routine.id + '\',\'' + sub.id + '\',' + (!!sub.optional) + ')"';
+    const editBtns = isEditing ?
+      '<button class="subtask-mini-btn" onclick="moveSubtask(\'' + routine.id + '\',\'' + sub.id + '\',-1)">▲</button>' +
+      '<button class="subtask-mini-btn" onclick="moveSubtask(\'' + routine.id + '\',\'' + sub.id + '\',1)">▼</button>' +
+      '<button class="subtask-mini-btn subtask-edit-btn" onclick="startEditSubtask(\'' + routine.id + '\',\'' + sub.id + '\')">✎</button>' +
+      '<button class="subtask-mini-btn subtask-del" onclick="deleteSubtask(\'' + routine.id + '\',\'' + sub.id + '\')">✕</button>' : '';
+    return '<div class="subtask ' + (sub.optional ? 'optional' : '') + '"' + clickAttrs + '>' +
+      '<div class="subtask-clickable" onclick="toggleSubtask(\'' + routine.id + '\',\'' + sub.id + '\',' + (!!sub.optional) + ')">' +
+      '<div class="subtask-check ' + checkClass + '" style="--card-color:' + routine.color + '">' + (done ? '✓' : '') + '</div>' +
+      '<span>' + sub.name + (sub.optional ? ' (opcional)' : '') + (sub.desc ? '<br><span style="font-size:11px; color:var(--text-muted); font-style:normal;">' + sub.desc + '</span>' : '') + '</span>' +
       (sub.pts > 0 ? '<span class="subtask-pts">+' + sub.pts + '</span>' : '') +
-      '</div>';
+      '</div>' + editBtns + '</div>';
   }).join('');
 
+  let metaForm = '';
+  if (isEditingMeta) {
+    metaForm = '<div class="inline-form">' +
+      '<div class="inline-form-label">Título</div><input id="metaTitle_' + routine.id + '" value="' + routine.name.replace(/"/g,'&quot;') + '">' +
+      '<div class="inline-form-label">Subtítulo / ancla</div><input id="metaAnchor_' + routine.id + '" value="' + (routine.anchor || '').replace(/"/g,'&quot;') + '">' +
+      '<div class="inline-form-label">Categoría</div>' + categorySelectHtml('metaCategory_' + routine.id, config, routine.category) +
+      '<div class="inline-form-label">Color</div>' + colorSwatchesHtml('metaColor_' + routine.id, routine.color) +
+      '<div class="inline-form-actions"><button class="btn-primary" onclick="saveRoutineMeta(\'' + routine.id + '\')">Guardar</button><button class="btn-secondary" onclick="toggleEditRoutineMeta(\'' + routine.id + '\')">Cancelar</button></div>' +
+      '</div>';
+  }
+
+  let addSubForm = '';
+  if (isEditing && showAddSubtaskFor === routine.id) {
+    addSubForm = '<div class="inline-form">' +
+      '<div class="inline-form-label">Nombre de la tarea</div><input id="asubName_' + routine.id + '" placeholder="Ej: Tomar vitaminas">' +
+      '<div class="inline-form-label">Descripción breve (opcional)</div><input id="asubDesc_' + routine.id + '" placeholder="Ej: con el desayuno">' +
+      '<div class="inline-form-label">Puntos</div><input id="asubPoints_' + routine.id + '" type="number" value="10">' +
+      '<div class="inline-form-actions"><button class="btn-primary" onclick="submitNewSubtask(\'' + routine.id + '\')">Agregar</button><button class="btn-secondary" onclick="toggleAddSubtaskForm(\'' + routine.id + '\')">Cancelar</button></div>' +
+      '</div>';
+  }
+
+  const editPanel = isEditing ? (
+    '<div class="edit-panel">' +
+      '<button class="edit-row-btn" onclick="toggleAddSubtaskForm(\'' + routine.id + '\')">' + (showAddSubtaskFor === routine.id ? '✕ Cancelar' : '+ Agregar tarea') + '</button>' +
+      addSubForm +
+      '<button class="edit-row-btn" onclick="autobalanceRoutine(\'' + routine.id + '\')">Repartir en partes iguales (reset)</button>' +
+      '<button class="edit-row-btn" onclick="toggleEditRoutineMeta(\'' + routine.id + '\')">Editar título, ancla, categoría y color</button>' +
+      '<button class="edit-row-btn" onclick="toggleRoutineActive(\'' + routine.id + '\')">' + (isActive ? 'Desactivar rutina' : 'Activar rutina') + '</button>' +
+      '<button class="edit-row-btn danger" onclick="deleteRoutine(\'' + routine.id + '\')">Eliminar rutina</button>' +
+    '</div>' + metaForm
+  ) : '';
+
   const el = document.createElement('div');
-  el.className = 'habit-item' + (allRequiredDone ? ' completed' : '');
-  el.style.setProperty('--card-color', habit.color);
-  el.style.setProperty('--card-bg-done', habit.bgDone);
+  el.className = 'habit-item' + (allRequiredDone && isActive ? ' completed' : '') + (isActive ? '' : ' inactive');
+  el.style.setProperty('--card-color', routine.color);
+  el.style.setProperty('--card-bg-done', tint(routine.color, 0.14));
   el.innerHTML =
-    '<div class="habit-header"><span class="habit-name">' + habit.name + '</span><span class="habit-points">' + habitPts + '/' + maxPts + '</span></div>' +
-    '<div class="habit-anchor">' + habit.anchor + '</div>' +
-    '<div class="subtasks">' + subtasksHtml + '</div>';
-  container.appendChild(el);
-  return habitPts;
+    '<div class="habit-header"><span class="habit-name">' + routine.name + (isActive ? '' : ' (inactiva)') + '</span>' +
+    '<div style="display:flex; align-items:center; gap:6px;"><span class="habit-points">' + habitPts + '/' + maxPts + '</span>' +
+    (editable ? '<button class="edit-toggle-btn" onclick="moveRoutine(\'' + routine.id + '\',-1)">▲</button><button class="edit-toggle-btn" onclick="moveRoutine(\'' + routine.id + '\',1)">▼</button><button class="edit-toggle-btn" onclick="toggleEditRoutine(\'' + routine.id + '\')">✎</button>' : '') + '</div></div>' +
+    (routine.anchor ? '<div class="habit-anchor">' + routine.anchor + '</div>' : '<div style="margin-bottom:6px;"></div>') +
+    '<div class="subtasks">' + subtasksHtml + '</div>' +
+    (!editable && routine.subtasks.length > 0 ? '<div class="swipe-hint">Toca o desliza una tarea para marcarla</div>' : '') +
+    editPanel;
+
+  return { el: el, pts: isActive ? habitPts : 0 };
 }
 
+function renderDailyCard(d, state, editable) {
+  const subKey = 'daily_' + d.id;
+  const done = !!state.subtaskDone[subKey];
+  const isActive = d.active !== false;
+  const isEditing = editable && editingDaily.has(d.id);
+  const isEditingMeta = editingDailyMeta.has(d.id);
+  const config = getConfig();
+
+  const el = document.createElement('div');
+  el.className = 'daily-card' + (done && isActive ? ' completed' : '') + (isActive ? '' : ' inactive');
+  el.style.setProperty('--card-color', d.color);
+  el.style.setProperty('--card-bg-done', tint(d.color, 0.14));
+  if (!editable) {
+    el.ontouchstart = swipeStart; el.ontouchmove = swipeMove;
+    el.ontouchend = (e) => swipeEndDaily(e, d.id);
+  }
+
+  let inner = (editable ? '<button class="daily-edit-btn" style="right:66px;" onclick="moveDaily(\'' + d.id + '\',-1)">▲</button><button class="daily-edit-btn" style="right:40px;" onclick="moveDaily(\'' + d.id + '\',1)">▼</button><button class="daily-edit-btn" onclick="toggleEditDaily(\'' + d.id + '\')">✎</button>' : '') +
+    '<div class="daily-name">' + d.name + (isActive ? '' : ' (inactivo)') + '</div>' +
+    '<button class="daily-check" style="--card-color:' + d.color + '" onclick="toggleDaily(\'' + d.id + '\')">' + (done ? '✓ +' + d.pts : '+' + d.pts + ' pts') + '</button>';
+
+  if (isEditing) {
+    inner += '<div class="daily-edit-panel">' +
+      '<button class="edit-row-btn" onclick="toggleEditDailyMeta(\'' + d.id + '\')">Editar</button>' +
+      '<button class="edit-row-btn" onclick="toggleDailyActive(\'' + d.id + '\')">' + (isActive ? 'Desactivar' : 'Activar') + '</button>' +
+      '<button class="edit-row-btn danger" onclick="deleteDailyHabit(\'' + d.id + '\')">Eliminar</button>' +
+    '</div>';
+  }
+  if (isEditingMeta) {
+    inner += '<div class="inline-form" style="text-align:left;">' +
+      '<div class="inline-form-label">Título</div><input id="dmetaTitle_' + d.id + '" value="' + d.name.replace(/"/g,'&quot;') + '">' +
+      '<div class="inline-form-label">Puntos</div><input id="dmetaPoints_' + d.id + '" type="number" value="' + d.pts + '">' +
+      '<div class="inline-form-label">Categoría</div>' + categorySelectHtml('dmetaCategory_' + d.id, config, d.category) +
+      '<div class="inline-form-label">Color</div>' + colorSwatchesHtml('dmetaColor_' + d.id, d.color) +
+      '<div class="inline-form-actions"><button class="btn-primary" onclick="saveDailyMeta(\'' + d.id + '\')">Guardar</button><button class="btn-secondary" onclick="toggleEditDailyMeta(\'' + d.id + '\')">Cancelar</button></div>' +
+      '</div>';
+  }
+  el.innerHTML = inner;
+  return { el: el, pts: (done && isActive) ? d.pts : 0 };
+}
+
+// ---- Render vista Hoy (solo checklist) ----
 function render() {
-  const state = getState();
+  if (!selectedDate) selectedDate = todayKey();
+  const config = getConfig();
+  const state = getState(selectedDate);
   document.getElementById('identityLine').textContent = identityPhrases[new Date().getDay()];
 
-  const morningContainer = document.getElementById('morningContainer');
-  morningContainer.innerHTML = '';
-  const eveningContainer = document.getElementById('eveningContainer');
-  eveningContainer.innerHTML = '';
+  const today = todayKey();
+  const minDate = addDaysToKey(today, -1);
+  const maxDate = addDaysToKey(today, 1);
+  document.getElementById('dayPrevBtn').disabled = selectedDate <= minDate;
+  document.getElementById('dayNextBtn').disabled = selectedDate >= maxDate;
+  let label;
+  if (selectedDate === today) label = 'Hoy';
+  else { const d = new Date(selectedDate + 'T00:00:00'); label = d.toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'short' }); }
+  document.getElementById('dayLabel').textContent = label;
 
+  const section = document.getElementById('habitsSection');
+  section.innerHTML = '';
   let totalPoints = 0;
-  habitsMorning.forEach(h => totalPoints += renderHabitBlock(h, morningContainer, state));
-  habitsEvening.forEach(h => totalPoints += renderHabitBlock(h, eveningContainer, state));
 
-  const dailyContainer = document.getElementById('dailyHabitsContainer');
-  dailyContainer.innerHTML = '';
-  dailyHabits.forEach(d => {
-    const subKey = d.id + '_0';
-    const done = !!state.subtaskDone[subKey];
-    if (done) totalPoints += d.pts;
-    const el = document.createElement('div');
-    el.className = 'daily-card' + (done ? ' completed' : '');
-    el.style.setProperty('--card-color', d.color);
-    el.style.setProperty('--card-bg-done', d.bgDone);
-    el.innerHTML = '<div class="daily-name">' + d.name + '</div><button class="daily-check" style="--card-color:' + d.color + '" onclick="toggleDaily(\'' + d.id + '\')">' + (done ? '✓ +' + d.pts : '+' + d.pts + ' pts') + '</button>';
-    dailyContainer.appendChild(el);
+  const routineGroups = groupByCategory(config.routines, config);
+  routineGroups.forEach(group => {
+    const title = document.createElement('div'); title.className = 'section-title'; title.textContent = group.cat;
+    section.appendChild(title);
+    group.items.forEach(r => { const result = renderRoutineCard(r, state, false); totalPoints += result.pts; section.appendChild(result.el); });
   });
+
+  const dailyGroups = groupByCategory(config.dailyHabits, config);
+  dailyGroups.forEach(group => {
+    const title = document.createElement('div'); title.className = 'section-title'; title.textContent = group.cat;
+    section.appendChild(title);
+    const grid = document.createElement('div'); grid.className = 'daily-grid';
+    group.items.forEach(d => { const result = renderDailyCard(d, state, false); totalPoints += result.pts; grid.appendChild(result.el); });
+    section.appendChild(grid);
+  });
+
+  const max = maxDayTotal(config);
+  const pct = max > 0 ? Math.round((totalPoints / max) * 100) : 0;
+  renderProgressRing(pct);
 
   document.getElementById('totalPoints').textContent = totalPoints;
   document.getElementById('streakDays').textContent = getStreak();
-  markDateTouched(state);
+  document.getElementById('freezeNote').textContent = '❄️ ' + getFreezes() + ' congelamientos disponibles';
+  markDateTouched(state.date);
+}
+
+// ---- Render vista Config ----
+function renderConfig() {
+  const config = getConfig();
+  const state = getState(selectedDate || todayKey());
+  const section = document.getElementById('configSection');
+  section.innerHTML = '';
+
+  const catOrder = getCategoryOrder(config);
+  if (catOrder.length > 1) {
+    const catTitle = document.createElement('div'); catTitle.className = 'config-section-title'; catTitle.style.padding = '0'; catTitle.textContent = 'Orden de categorías';
+    section.appendChild(catTitle);
+    catOrder.forEach((cat, i) => {
+      const row = document.createElement('div');
+      row.style.cssText = 'display:flex; align-items:center; justify-content:space-between; background:var(--surface-1); border:0.5px solid var(--border); border-radius:8px; padding:8px 12px; margin-bottom:8px;';
+      row.innerHTML = '<span style="font-size:13px; font-weight:600;">' + cat + '</span>' +
+        '<div><button class="edit-toggle-btn" onclick="moveCategory(\'' + cat.replace(/'/g,"\\'") + '\',-1)">▲</button><button class="edit-toggle-btn" onclick="moveCategory(\'' + cat.replace(/'/g,"\\'") + '\',1)">▼</button></div>';
+      section.appendChild(row);
+    });
+  }
+
+  const titleR = document.createElement('div'); titleR.className = 'config-section-title'; titleR.style.padding = '0'; titleR.textContent = 'Rutinas';
+  section.appendChild(titleR);
+  const routineGroups = groupByCategory(config.routines, config);
+  routineGroups.forEach(group => {
+    const gt = document.createElement('div'); gt.className = 'section-title'; gt.style.padding = '0'; gt.textContent = group.cat;
+    section.appendChild(gt);
+    group.items.forEach(r => { const result = renderRoutineCard(r, state, true); section.appendChild(result.el); });
+  });
+  const addRoutineBtn = document.createElement('button');
+  addRoutineBtn.className = 'add-btn';
+  addRoutineBtn.textContent = showAddRoutineForm ? '✕ Cancelar' : '+ Agregar rutina nueva';
+  addRoutineBtn.onclick = toggleAddRoutineForm;
+  section.appendChild(addRoutineBtn);
+  if (showAddRoutineForm) {
+    const form = document.createElement('div'); form.className = 'inline-form';
+    form.innerHTML =
+      '<div class="inline-form-label">Título</div><input id="newRoutineTitle" placeholder="Ej: Rutina de tarde">' +
+      '<div class="inline-form-label">Subtítulo / ancla (opcional)</div><input id="newRoutineAnchor" placeholder="Ej: Después de almorzar">' +
+      '<div class="inline-form-label">Categoría</div>' + categorySelectHtml('newRoutineCategory', config, null) +
+      '<div class="inline-form-label">Color</div>' + colorSwatchesHtml('newRoutineColorPicker', CARD_COLORS[config.routines.length % CARD_COLORS.length]) +
+      '<div class="inline-form-actions"><button class="btn-primary" onclick="submitNewRoutine()">Crear rutina</button><button class="btn-secondary" onclick="toggleAddRoutineForm()">Cancelar</button></div>';
+    section.appendChild(form);
+  }
+
+  const titleD = document.createElement('div'); titleD.className = 'config-section-title'; titleD.style.padding = '0'; titleD.textContent = 'Hábitos diarios';
+  section.appendChild(titleD);
+  const dailyGroupsC = groupByCategory(config.dailyHabits, config);
+  dailyGroupsC.forEach(group => {
+    const gt = document.createElement('div');
+    gt.style.cssText = 'display:flex; align-items:center; justify-content:space-between; margin: 8px 0 8px;';
+    gt.innerHTML = '<span class="section-title" style="margin:0; padding:0;">' + group.cat + '</span>' +
+      '<button class="edit-row-btn" style="padding:5px 8px; font-size:10px;" onclick="autobalanceDailyCategory(\'' + group.cat.replace(/'/g,"\\'") + '\')">Partes iguales</button>';
+    section.appendChild(gt);
+    group.items.forEach(d => { const result = renderDailyCard(d, state, true); section.appendChild(result.el); });
+  });
+  const addDailyBtn = document.createElement('button');
+  addDailyBtn.className = 'add-btn';
+  addDailyBtn.textContent = showAddDailyForm ? '✕ Cancelar' : '+ Agregar hábito diario';
+  addDailyBtn.onclick = toggleAddDailyForm;
+  section.appendChild(addDailyBtn);
+  if (showAddDailyForm) {
+    const form = document.createElement('div'); form.className = 'inline-form';
+    form.innerHTML =
+      '<div class="inline-form-label">Título</div><input id="newDailyTitle" placeholder="Ej: Meditar">' +
+      '<div class="inline-form-label">Puntos</div><input id="newDailyPoints" type="number" value="50">' +
+      '<div class="inline-form-label">Categoría</div>' + categorySelectHtml('newDailyCategory', config, null) +
+      '<div class="inline-form-label">Color</div>' + colorSwatchesHtml('newDailyColorPicker', CARD_COLORS[(config.dailyHabits.length + 2) % CARD_COLORS.length]) +
+      '<div class="inline-form-actions"><button class="btn-primary" onclick="submitNewDaily()">Crear hábito</button><button class="btn-secondary" onclick="toggleAddDailyForm()">Cancelar</button></div>';
+    section.appendChild(form);
+  }
+
+  const titleG = document.createElement('div'); titleG.className = 'config-section-title'; titleG.style.padding = '0'; titleG.textContent = 'Ajustes generales';
+  section.appendChild(titleG);
+  const freezeInfo = document.createElement('div');
+  freezeInfo.style.cssText = 'font-size:13px; color:var(--text-secondary); margin-bottom:8px;';
+  freezeInfo.textContent = 'Congelamientos de racha disponibles: ' + getFreezes() + ' (protegen tu racha si te saltas un día)';
+  section.appendChild(freezeInfo);
+  const resetFreezeBtn = document.createElement('button');
+  resetFreezeBtn.className = 'add-btn';
+  resetFreezeBtn.textContent = 'Restablecer congelamientos a 2';
+  resetFreezeBtn.onclick = resetFreezes;
+  section.appendChild(resetFreezeBtn);
+
+  const resetBtn = document.createElement('button');
+  resetBtn.className = 'reset-btn';
+  resetBtn.textContent = 'Reiniciar día actual (' + (selectedDate || todayKey()) + ')';
+  resetBtn.onclick = resetDay;
+  section.appendChild(resetBtn);
+}
+
+// ---- Onboarding ----
+function renderOnboarding() {
+  const config = getConfig();
+  const items = [];
+  config.routines.forEach(r => items.push({ type: 'routine', id: r.id, name: r.name }));
+  config.dailyHabits.forEach(d => items.push({ type: 'daily', id: d.id, name: d.name }));
+  const list = document.getElementById('onboardList');
+  list.innerHTML = '';
+  items.forEach(item => {
+    const row = document.createElement('div');
+    row.className = 'onboard-item';
+    row.innerHTML = '<div class="onboard-check checked" id="obcheck_' + item.type + '_' + item.id + '" onclick="toggleOnboardItem(\'' + item.type + '\',\'' + item.id + '\')">✓</div><span>' + item.name + '</span>';
+    list.appendChild(row);
+  });
+}
+function toggleOnboardItem(type, id) {
+  const el = document.getElementById('obcheck_' + type + '_' + id);
+  const checked = el.classList.toggle('checked');
+  el.textContent = checked ? '✓' : '';
+}
+function finishOnboarding() {
+  const config = getConfig();
+  config.routines.forEach(r => { const el = document.getElementById('obcheck_routine_' + r.id); r.active = el ? el.classList.contains('checked') : true; });
+  config.dailyHabits.forEach(d => { const el = document.getElementById('obcheck_daily_' + d.id); d.active = el ? el.classList.contains('checked') : true; });
+  saveConfig(config);
+  localStorage.setItem('onboardingDone', 'true');
+  document.getElementById('onboardingScreen').style.display = 'none';
+  document.getElementById('appContainer').style.display = 'block';
+  render();
+  syncToCloud();
+}
+
+// ---- Login / Firebase ----
+function togglePasswordVisibility() {
+  const input = document.getElementById('loginPassword');
+  const btn = document.getElementById('togglePwBtn');
+  if (input.type === 'password') { input.type = 'text'; btn.textContent = 'Ocultar'; }
+  else { input.type = 'password'; btn.textContent = 'Ver'; }
+}
+
+function handleLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const errEl = document.getElementById('loginError');
+  errEl.style.display = 'none';
+  if (!email || !password) { errEl.textContent = 'Ingresa tu correo y contraseña.'; errEl.style.display = 'block'; return; }
+  auth.signInWithEmailAndPassword(email, password).catch(err => { errEl.textContent = traducirErrorFirebase(err.code); errEl.style.display = 'block'; });
+}
+
+function handleRegister() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const errEl = document.getElementById('loginError');
+  errEl.style.display = 'none';
+  if (!email || !password) { errEl.textContent = 'Ingresa tu correo y contraseña.'; errEl.style.display = 'block'; return; }
+  if (password.length < 6) { errEl.textContent = 'La contraseña debe tener al menos 6 caracteres.'; errEl.style.display = 'block'; return; }
+  auth.createUserWithEmailAndPassword(email, password).catch(err => { errEl.textContent = traducirErrorFirebase(err.code); errEl.style.display = 'block'; });
+}
+
+function handleLogout() { if (confirm('¿Cerrar sesión?')) auth.signOut(); }
+
+function traducirErrorFirebase(code) {
+  const map = {
+    'auth/invalid-email': 'Correo inválido.',
+    'auth/user-not-found': 'No existe una cuenta con ese correo.',
+    'auth/wrong-password': 'Contraseña incorrecta.',
+    'auth/invalid-credential': 'Correo o contraseña incorrectos.',
+    'auth/email-already-in-use': 'Ya existe una cuenta con ese correo. Inicia sesión.',
+    'auth/weak-password': 'La contraseña debe tener al menos 6 caracteres.',
+    'auth/too-many-requests': 'Demasiados intentos. Espera un momento.'
+  };
+  return map[code] || 'Ocurrió un error. Intenta de nuevo.';
+}
+
+function setSyncStatus(text) { const el = document.getElementById('syncStatus'); if (el) el.textContent = text; }
+
+function collectAllLocalData() {
+  const data = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (LOCAL_KEY_EXACT.includes(key) || LOCAL_KEY_PREFIXES.some(p => key.startsWith(p))) data[key] = localStorage.getItem(key);
+  }
+  return data;
+}
+
+function restoreLocalData(data) {
+  applyingRemoteData = true;
+  Object.keys(data).forEach(key => { if (key !== '_updatedAt') localStorage.setItem(key, data[key]); });
+  applyingRemoteData = false;
+}
+
+function syncToCloud() {
+  if (!currentUid || applyingRemoteData) return;
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(() => {
+    const data = collectAllLocalData();
+    data._updatedAt = Date.now();
+    setSyncStatus('Guardando...');
+    db.collection('userData').doc(currentUid).set(data)
+      .then(() => setSyncStatus('☁️ Sincronizado'))
+      .catch(() => setSyncStatus('No se pudo guardar (revisa conexión)'));
+  }, 400);
+}
+
+function initCloudSync() {
+  auth.onAuthStateChanged(user => {
+    if (!user) {
+      currentUid = null;
+      document.getElementById('loginScreen').style.display = 'block';
+      document.getElementById('appContainer').style.display = 'none';
+      document.getElementById('onboardingScreen').style.display = 'none';
+      return;
+    }
+    document.getElementById('loginScreen').style.display = 'none';
+    currentUid = user.uid;
+    db.collection('userData').doc(currentUid).get().then(doc => {
+      if (doc.exists) restoreLocalData(doc.data());
+      setSyncStatus('☁️ Sincronizado');
+      launchApp();
+    }).catch(err => {
+      setSyncStatus('Sin conexión a la nube (' + err.code + ') — revisa las reglas de Firestore');
+      launchApp();
+    });
+    db.collection('userData').doc(currentUid).onSnapshot(doc => {
+      if (!doc.exists) return;
+      const remote = doc.data();
+      if (remote._updatedAt && remote._updatedAt !== window._lastAppliedUpdate) {
+        window._lastAppliedUpdate = remote._updatedAt;
+        restoreLocalData(remote);
+        if (inConfigView) renderConfig(); else render();
+      }
+    }, err => { setSyncStatus('Nube desconectada (' + err.code + ')'); });
+  });
+}
+
+function launchApp() {
+  if (!localStorage.getItem('onboardingDone')) {
+    renderOnboarding();
+    document.getElementById('onboardingScreen').style.display = 'block';
+    document.getElementById('appContainer').style.display = 'none';
+  } else {
+    document.getElementById('onboardingScreen').style.display = 'none';
+    document.getElementById('appContainer').style.display = 'block';
+    render();
+  }
 }
 
 initCloudSync();
