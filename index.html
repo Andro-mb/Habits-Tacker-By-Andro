@@ -203,7 +203,11 @@
   <h1 style="font-size: 20px; font-weight: 600; text-align: center; margin-bottom: 6px;">Mi rutina</h1>
   <p style="font-size: 13px; color: var(--text-secondary); text-align: center; margin-bottom: 24px;">Inicia sesión para guardar tu progreso</p>
   <input type="email" id="loginEmail" placeholder="Correo" style="width:100%; background: var(--surface-1); border: 0.5px solid var(--border); border-radius: 8px; padding: 12px; font-size: 14px; color: var(--text-primary); margin-bottom: 10px;">
-  <input type="password" id="loginPassword" placeholder="Contraseña" style="width:100%; background: var(--surface-1); border: 0.5px solid var(--border); border-radius: 8px; padding: 12px; font-size: 14px; color: var(--text-primary); margin-bottom: 14px;">
+  <div style="position: relative; margin-bottom: 4px;">
+    <input type="password" id="loginPassword" placeholder="Contraseña" style="width:100%; background: var(--surface-1); border: 0.5px solid var(--border); border-radius: 8px; padding: 12px; padding-right: 46px; font-size: 14px; color: var(--text-primary);">
+    <button type="button" onclick="togglePasswordVisibility()" id="togglePwBtn" style="position:absolute; right:8px; top:50%; transform:translateY(-50%); background:transparent; border:none; color: var(--text-secondary); font-size: 12px; cursor:pointer; padding: 6px;">Ver</button>
+  </div>
+  <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 14px;">Ej: algo como <span style="color:var(--text-secondary);">Chaski2026!</span> — mínimo 6 caracteres, mezcla letras, números y un símbolo.</p>
   <div id="loginError" style="font-size: 12px; color: var(--text-danger); margin-bottom: 10px; display:none;"></div>
   <button onclick="handleLogin()" style="width:100%; background: var(--fill-accent); color: var(--on-accent); border:none; padding: 12px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor:pointer; margin-bottom: 10px;">Iniciar sesión</button>
   <button onclick="handleRegister()" style="width:100%; background: transparent; color: var(--text-secondary); border: 0.5px solid var(--border); padding: 12px; border-radius: 8px; font-size: 14px; cursor:pointer;">Crear cuenta nueva</button>
@@ -336,6 +340,18 @@ function syncToCloud() {
   }, 400);
 }
 
+function togglePasswordVisibility() {
+  const input = document.getElementById('loginPassword');
+  const btn = document.getElementById('togglePwBtn');
+  if (input.type === 'password') {
+    input.type = 'text';
+    btn.textContent = 'Ocultar';
+  } else {
+    input.type = 'password';
+    btn.textContent = 'Ver';
+  }
+}
+
 function handleLogin() {
   const email = document.getElementById('loginEmail').value.trim();
   const password = document.getElementById('loginPassword').value;
@@ -444,10 +460,12 @@ const habitsMorning = [{
   color: '#C9781F', bgDone: 'rgba(201,120,31,0.14)',
   subtasks: [
     { name: 'Despertarse a tiempo', pts: 15 },
+    { name: 'Luz solar directa (5-10 min)', pts: 15 },
+    { name: 'Vaso de agua', pts: 10 },
     { name: 'Estiramientos', pts: 15 },
     { name: 'Ducha y aseo personal', pts: 15 },
     { name: 'Desayuno', pts: 15 },
-    { name: 'Top 3 del día, pts: 15 },
+    { name: 'Prioridad #1 del día', pts: 15 },
     { name: 'Meditación', pts: 0, optional: true }
   ]
 }];
@@ -457,7 +475,7 @@ const habitsEvening = [{
   color: '#6E56CF', bgDone: 'rgba(110,86,207,0.14)',
   subtasks: [
     { name: 'Preparar cosas para mañana', pts: 20 },
-    { name: 'Sin pantallas despues de las 22:00', pts: 20 },
+    { name: 'Sin pantallas (hora límite)', pts: 20 },
     { name: 'Ducha', pts: 15 },
     { name: 'Meditación / oración', pts: 15 },
     { name: 'Escribir qué aprendí y qué hice bien', pts: 30 }
